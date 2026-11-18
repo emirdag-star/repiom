@@ -23,7 +23,15 @@ export default tseslint.config(
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },
   {
-    files: ['**/apps/web/**/*.{ts,tsx}'],
+    // core saf TypeScript kalmalı: web, mobil ve sunucu aynı paketi kullanır.
+    files: ['**/core/src/**/*.ts'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: ['node:*', 'react', 'react-*', '@supabase/*'] }],
+      'no-restricted-globals': ['error', 'window', 'document', 'process', 'localStorage', 'fetch'],
+    },
+  },
+  {
+    files: ['**/web/src/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
     rules: {
       ...reactHooks.configs.recommended.rules,

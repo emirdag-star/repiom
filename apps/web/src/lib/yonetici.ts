@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '../auth/AuthProvider';
+import { useAuth } from '../auth/useAuth';
 import { supabase } from './supabase';
 
 /** Yönetici yetkisi sunucuda (yonetici_mi fonksiyonu) belirlenir; istemci yalnız gösterim için sorar. */

@@ -268,7 +268,7 @@ function SatinAl({
         setHavale({ referans: r.referans, tutar: Number(r.tutar) });
         await bitti('Havale/EFT bildirimin alındı. Ödemen onaylanınca hakların tanımlanacak.');
       } else {
-        window.location.assign(await kartlaOde(paket.id, adet, f));
+        window.location.assign(await kartlaOde(paket.id, adet, f, window.location.origin + '/paketler'));
       }
     } catch (e) {
       setHata(turkceHata(e));

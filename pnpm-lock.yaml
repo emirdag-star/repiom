@@ -220,6 +220,9 @@ importers:
       '@repiom/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@repiom/istemci':
+        specifier: workspace:*
+        version: link:../../packages/istemci
       '@repiom/report':
         specifier: workspace:*
         version: link:../../packages/report
@@ -293,6 +296,31 @@ importers:
       tsx:
         specifier: ^4.23.15
         version: 4.23.15
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
+  packages/istemci:
+    dependencies:
+      '@repiom/core':
+        specifier: workspace:*
+        version: link:../core
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@supabase/supabase-js':
+        specifier: ^2.119.0
+        version: 2.119.0
+      '@tanstack/react-query':
+        specifier: ^5.108.0
+        version: 5.108.0(@types/react@19.3.0)(react@19.3.1)
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
+      react:
+        specifier: ^19.3.1
+        version: 19.3.1
       typescript:
         specifier: ~6.0.3
         version: 6.0.3

@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { Yukleniyor } from '../components/Yukleniyor';
-import { useAuth } from './AuthProvider';
+import { useAuth } from './useAuth';
 
 /** Oturum yoksa giriş ekranına yönlendirir; girişten sonra kullanıcı geldiği sayfaya döner. */
 export function OturumGerekli() {

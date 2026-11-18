@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet } from 'react-router';
-import { useAuth } from '../auth/AuthProvider';
+import { useAuth } from '../auth/useAuth';
 import { useYoneticiMi } from '../lib/yonetici';
 import { Logo } from './Logo';
 

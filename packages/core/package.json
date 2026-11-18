@@ -13,10 +13,12 @@
     "test": "vitest run",
     "build": "tsc --noEmit",
     "gen:formulas": "node scripts/gen-formulas.ts",
-    "gen:check": "node scripts/gen-formulas.ts --check"
+    "gen:check": "node scripts/gen-formulas.ts --check",
+    "dxf:karsilastir": "tsx scripts/dxf-karsilastir.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.3"
   }
 }

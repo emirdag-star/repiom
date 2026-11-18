@@ -21,7 +21,8 @@
     "env:yerel": "node scripts/env-yerel.mjs",
     "e2e": "pnpm --filter @repiom/web e2e",
     "gen:formulas": "pnpm --filter @repiom/core gen:formulas",
-    "gen:check": "pnpm --filter @repiom/core gen:check"
+    "gen:check": "pnpm --filter @repiom/core gen:check",
+    "dxf:karsilastir": "pnpm --filter @repiom/core dxf:karsilastir"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

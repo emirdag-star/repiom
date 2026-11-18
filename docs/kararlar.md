@@ -61,3 +61,13 @@ Her satır: karar — gerekçe. Ürün kararları burada değil; onlar ürün sa
 - Sürüm listesi yönetici fonksiyonuyla (`fiyat_listesi_surumleri`), fiyat içeriği olmadan ve yayınlayanın e-postasıyla.
 - Yayındaki listeyi değiştiren uçtan uca testler ayrı bir Playwright projesinde (`yonetici`), diğer testler bittikten sonra tek başına çalışıyor ve sonunda eski sürümü geri yayına alıyor.
 - İndirme bağlantısı sayfaya eklenmeden tıklanıyor — erişilebilirlik taraması sayfada kalan metinsiz bağlantıyı yakalamıştı.
+
+## Faz 5
+
+- DXF kuralları `packages/core/src/dxf` altında, prototip `dxf.js` ile aynı (iki gerçek çizimle doğrulanmış kurallar korunsun); okuma, mimari, statik ve proje girdisi prototiple birebir karşılaştırmalı testli. `pnpm dxf:karsilastir <mimari.dxf> [statik.dxf]` gerçek çizimde aynı karşılaştırmayı yerelde yapar (çizim bilgisayardan çıkmaz).
+- Okuma ve analiz tarayıcıda bir Web Worker'da; dosya `File.stream()` ile parça parça okunur, ilerleme gösterilir. Çizim verisi worker'da kalır; plan önizlemesi orada OffscreenCanvas ile çizilip PNG olarak gelir (ana sayfa milyonlarca çizgiyi taşımaz).
+- 100 MB'lık kurgusal çizim (1,1 milyon çizgi, 100 bin yazı) Node'da ~7 sn'de okunup analiz ediliyor (sınır 60 sn); test her çalıştırmada ölçüyor.
+- PROTOTİPTEN FARK 1 — birim: prototip birimi ölçülerden tespit edip yalnız raporluyordu. Yeni kod tespit edilen birime göre (mm/m) koordinatları cm'ye çeviriyor; statik dosyanın birimi kolon kesitlerinden ayrıca tespit ediliyor. cm çizimlerde sonuç değişmez. (Onay bekliyor.)
+- PROTOTİPTEN FARK 2 — mimaride aynı kat iki kez çizilmişse uyarı veriliyor ve kontrol ekranında kat "hesaba dahil" işaretiyle dışarıda bırakılabiliyor. Kullanıcı bir şey yapmazsa sonuç prototiple aynı. (Onay bekliyor.)
+- Kurgusal örnek çizim üreticisi TypeScript'te (`example.ts`); varsayılan çıktı prototipin Python üreticisiyle bayt bayt aynı. Ücretsiz deneme bu çizimi kullanıyor; testler için birim, yazım biçimi, kopya kat, çok blok çeşitlemeleri var. Gerçek DXF'ler depoya girmez (`.gitignore`: `*.dxf`).
+- Analiz hakkı (sunucuda düşme) ve yapay zekâ adımı bu fazda yok: Faz 6 ve 7'de eklenecek; şimdilik modül oturum açmış herkese açık.

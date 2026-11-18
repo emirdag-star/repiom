@@ -812,3 +812,69 @@ td.buyuk-degisim {
 input[type='file'] {
   padding: 8px;
 }
+
+/* ---------- Faz 5: çizimden maliyet ---------- */
+.kart.vurgu {
+  border-left: 4px solid var(--vurgu-koyu);
+}
+
+.kucuk-kartlar {
+  margin: 0 0 12px;
+}
+
+.kucuk-kartlar dd {
+  margin: 0;
+}
+
+.olcu .d.kucuk-d {
+  font-size: 16px;
+}
+
+table.sikisik td,
+table.sikisik th {
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+table.sikisik select {
+  min-height: 36px;
+  padding: 4px 6px;
+  width: auto;
+  max-width: 220px;
+}
+
+.mahal-tablosu {
+  min-width: 980px;
+}
+
+tr.soluk td {
+  color: #6b7280;
+  background: #f9fafb;
+}
+
+tr.secili td {
+  background: #fff7ed;
+}
+
+.onizleme {
+  margin: 14px 0 0;
+}
+
+.onizleme img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--cizgi);
+  border-radius: 8px;
+}
+
+.onizleme figcaption {
+  font-size: 13px;
+  color: var(--soluk);
+  margin-top: 6px;
+}
+
+progress {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+}

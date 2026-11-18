@@ -50,3 +50,14 @@ Her satır: karar — gerekçe. Ürün kararları burada değil; onlar ürün sa
 - Projenin girdisi `projeler.girdi` alanında prototiple aynı JSON biçiminde; eski/eksik kayıtlar açılırken tamamlanıyor (`girdiyiTamamla`).
 - Onay soruları `<dialog>` ile (tarayıcının confirm penceresi yerine) — erişilebilir ve uygulamanın görünümüyle uyumlu.
 - Erişilebilirlik: Playwright + axe-core ile WCAG 2.1 A/AA taraması (giriş, kayıt, Projelerim, 7 adım).
+
+## Faz 4
+
+- Fiyat listesi mantığı (`packages/core/src/prices.ts`) prototipteki `fiyat.js` ile aynı kurallar; kalem listesi, sayı okuma, fiyat ayıklama ve farklar prototiple karşılaştırmalı testli. Excel okuma/yazma `packages/report/src/priceTable.ts` (ExcelJS).
+- Yayınlanan liste = yayındaki liste + yüklenen yeni fiyatlar (prototipteki gibi); boş bırakılan hücre fiyatı değiştirmez. Hatalı satırlar listelenir ve yayına alınmaz.
+- Ekleme ve yayınlama tek sunucu fonksiyonunda (`fiyat_listesi_ekle_yayinla`), tek işlemde — yarım kalmış (eklenmiş ama yayınlanmamış) liste oluşmaz.
+- Fiyat listesi içeriği veritabanında da doğrulanıyor (`fiyat_listesi_gecerli`: kod K + 3 rakam, fiyat 0–10 milyar sayı, en çok 1000 kalem) — istemciye güvenilmez.
+- Fiyat listeleri değiştirilemez ve silinemez; geri dönüş eski sürümü yeniden yayına almakla. Projeler hesaplandıkları listeyi tuttuğu için geçmiş sonuçlar bozulmaz.
+- Sürüm listesi yönetici fonksiyonuyla (`fiyat_listesi_surumleri`), fiyat içeriği olmadan ve yayınlayanın e-postasıyla.
+- Yayındaki listeyi değiştiren uçtan uca testler ayrı bir Playwright projesinde (`yonetici`), diğer testler bittikten sonra tek başına çalışıyor ve sonunda eski sürümü geri yayına alıyor.
+- İndirme bağlantısı sayfaya eklenmeden tıklanıyor — erişilebilirlik taraması sayfada kalan metinsiz bağlantıyı yakalamıştı.

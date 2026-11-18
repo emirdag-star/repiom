@@ -16,8 +16,16 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
-    { name: 'masaustu', use: { ...devices['Desktop Chrome'] } },
-    { name: 'telefon', use: { ...devices['Pixel 7'] } },
+    { name: 'masaustu', testIgnore: /yonetici[\\/]/, use: { ...devices['Desktop Chrome'] } },
+    { name: 'telefon', testIgnore: /yonetici[\\/]/, use: { ...devices['Pixel 7'] } },
+    // Yayındaki fiyat listesini değiştiren testler: diğerleri bittikten sonra, tek başına.
+    {
+      name: 'yonetici',
+      testMatch: /yonetici[\\/].*\.spec\.ts/,
+      dependencies: ['masaustu', 'telefon'],
+      fullyParallel: false,
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
   webServer: {
     command: 'pnpm build && pnpm preview',

@@ -1,4 +1,6 @@
 import { expect, type Page } from '@playwright/test';
+import { execSync } from 'node:child_process';
+import { resolve } from 'node:path';
 
 export const SIFRE = 'DenemeSifre123';
 
@@ -50,3 +52,41 @@ export async function kaydedildi(page: Page) {
 
 /** "1.234.567 TL" → 1234567 */
 export const tlOku = (s: string) => Number(s.replace(/[^\d,]/g, '').replace(',', '.'));
+
+/** Yerel Supabase anahtarları (yalnız test; `supabase status`). */
+function yerelAnahtarlar(): { url: string; servis: string } {
+  // Playwright apps/web klasöründe çalışır; Supabase yapılandırması deponun kökünde.
+  const cikti = execSync('pnpm exec supabase status -o env', {
+    cwd: resolve(process.cwd(), '..', '..'),
+    encoding: 'utf8',
+  });
+  const al = (k: string) => (new RegExp(`^${k}="?([^"\n]*)"?`, 'm').exec(cikti) ?? [])[1] ?? '';
+  return { url: al('API_URL'), servis: al('SERVICE_ROLE_KEY') };
+}
+let anahtarlar: { url: string; servis: string } | null = null;
+
+/** Testteki oturum açık kullanıcıya analiz hakkı tanımlar (hizmet rolüyle, doğrudan hak defterine). */
+export async function hakVer(page: Page, miktar = 5) {
+  anahtarlar ??= yerelAnahtarlar();
+  const id = await page.evaluate(() => {
+    const k = Object.keys(localStorage).find((x) => x.endsWith('-auth-token'))!;
+    return (JSON.parse(localStorage.getItem(k)!) as { user: { id: string } }).user.id;
+  });
+  const r = await fetch(`${anahtarlar.url}/rest/v1/hak_hareketleri`, {
+    method: 'POST',
+    headers: {
+      apikey: anahtarlar.servis,
+      Authorization: `Bearer ${anahtarlar.servis}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({
+      kullanici: id,
+      miktar,
+      gecerlilik: new Date(Date.now() + 30 * 864e5).toISOString(),
+      kaynak: 'yonetici',
+      aciklama: 'Test',
+    }),
+  });
+  expect(r.ok, await r.text()).toBe(true);
+}

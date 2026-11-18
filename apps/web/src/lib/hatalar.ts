@@ -41,12 +41,10 @@ export function turkceHata(hata: unknown): string {
   const mesaj = typeof h.message === 'string' ? h.message : typeof hata === 'string' ? hata : '';
 
   if (kod && AUTH_KODLARI[kod]) return AUTH_KODLARI[kod];
-  if (kod && PG_KODLARI[kod]) {
-    // Sunucu fonksiyonlarımız zaten Türkçe mesaj üretir; onu tercih et.
-    return /[çğıöşüİ]/i.test(mesaj) ? mesaj : PG_KODLARI[kod];
-  }
-  // Kodsuz ve Türkçe yazılmış hata: uygulamanın kendi mesajıdır, olduğu gibi gösterilir.
-  if (!kod && /[çğıöşüİ]/i.test(mesaj)) return mesaj;
+  // Türkçe yazılmış hata: uygulamanın ya da sunucu fonksiyonlarımızın kendi mesajıdır (kod ne olursa olsun) —
+  // olduğu gibi gösterilir. Veritabanının İngilizce teknik mesajları gösterilmez.
+  if (/[çğıöşüİ]/i.test(mesaj)) return mesaj;
+  if (kod && PG_KODLARI[kod]) return PG_KODLARI[kod];
   if (
     h.name === 'AuthRetryableFetchError' ||
     h.status === 0 ||

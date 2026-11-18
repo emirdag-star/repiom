@@ -8,6 +8,7 @@ import { sayi } from '../lib/bicim';
 import { tarihGun, useAktifFiyatListesi } from '../lib/fiyat';
 import { turkceHata } from '../lib/hatalar';
 import { useYoneticiMi } from '../lib/yonetici';
+import { OdemeYonetimi } from './yonetici/OdemeYonetimi';
 import {
   dosyaIndir,
   fiyatListesiEkleYayinla,
@@ -43,12 +44,7 @@ export function YoneticiSayfasi() {
     <section aria-labelledby="yonetici-baslik">
       <h1 id="yonetici-baslik">Yönetici</h1>
       <FiyatListeleri />
-      <div className="kart">
-        <h2>Ödemeler, paketler ve haklar</h2>
-        <p className="not">
-          Bekleyen ödemeler, paket ayarları ve elle hak tanımlama ücretli modülle birlikte eklenecek.
-        </p>
-      </div>
+      <OdemeYonetimi />
     </section>
   );
 }

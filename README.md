@@ -18,6 +18,8 @@ pnpm dev
 
 Uygulama: http://localhost:5173 · Veritabanı yönetim paneli (Supabase Studio): http://127.0.0.1:55323
 
+`pnpm env:yerel` ayrıca sunucu fonksiyonlarının yerel ayarını (`supabase/functions/.env`, sahte iyzico) oluşturur; ilk seferde ardından `pnpm db:stop` ve `pnpm db:start` çalıştır.
+
 Yerelde e-posta doğrulaması kapalıdır; kayıt olunca doğrudan giriş yapılır. `yonetici@repiom.test` adresiyle kaydolan hesap yönetici olur (yalnız yerel, yer tutucu).
 
 ## Testler

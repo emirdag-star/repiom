@@ -3,13 +3,16 @@
  * Çizim sunucuya gönderilmez.
  */
 import { calculate, dxf, PROVINCES, type ProjectInput } from '@repiom/core';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
+import { EkranHatasi } from '../cizim/EkranHatasi';
 import { KontrolEkrani, type EkKalem } from '../cizim/KontrolEkrani';
 import type { AnalizSonucu } from '../cizim/mesajlar';
 import { useDxfIsci, type Ilerleme } from '../cizim/useDxfIsci';
 import { HataKutusu } from '../components/HataKutusu';
 import { MetinAlani, SayiAlani, SecimAlani } from '../components/form';
+import { analizBaslat, analizIade, analizProjeyeBagla, sha256, useHak } from '../lib/abonelik';
 import { aktifFiyatListesi } from '../lib/fiyat';
 import { turkceHata } from '../lib/hatalar';
 import { ozetCikar, projeOlustur } from '../lib/projeler';
@@ -65,12 +68,24 @@ export function CizimSayfasi() {
   const [ekler, setEkler] = useState<EkKalem[]>([]);
   const [hata, setHata] = useState<string | null>(null);
   const [aktariliyor, setAktariliyor] = useState(false);
+  const [analizId, setAnalizId] = useState<number | null>(null);
+  const istemci = useQueryClient();
+  const hak = useHak(!ornek);
 
   const baslat = async () => {
     setHata(null);
     if (!ornek && !mimari) return setHata('Mimari DXF dosyasını seç.');
     try {
       const a = await analizEt({ tur: 'analiz', mimari, statik, ornek });
+      // Çizim başarıyla okundu: kontrol ekranı açılmadan hemen önce hak sunucuda düşer
+      // (deneme yalnız hazır örnek çizimin parmak izleriyle ücretsiz). Hak yoksa ekran açılmaz.
+      const o = dxf.exampleDrawings();
+      const ozetler = ornek ? await Promise.all([sha256(o.mimari), sha256(o.statik)]) : [];
+      const dosyalar = [mimari, statik]
+        .filter((f): f is File => Boolean(f))
+        .map((f) => ({ ad: f.name, boyut: f.size }));
+      setAnalizId(await analizBaslat(v.ad.trim() || 'Çizim analizi', ornek ? [] : dosyalar, ornek, ozetler));
+      void istemci.invalidateQueries({ queryKey: ['hak'] });
       setAnaliz(a);
       setEkler(
         ekListesi(dxf.projectFromAnalysis(a, v.ad, { katYuksekligi: v.H, donatiKgM3: v.donati, il: v.il })),
@@ -107,6 +122,14 @@ export function CizimSayfasi() {
       const liste = await aktifFiyatListesi().catch(() => null);
       const ozet = ozetCikar(calculate(p, { fiyatlar: liste?.fiyatlar ?? null }));
       const id = await projeOlustur(p, liste?.id ?? null, ozet);
+      if (analizId)
+        await analizProjeyeBagla(analizId, id, {
+          kat: analiz.mimari.katlar.filter((k) => !k.haric).length,
+          mahal: analiz.mimari.katlar.reduce((t, k) => t + k.mahaller.length, 0),
+          toplam: ozet?.toplam ?? null,
+        }).catch(() => {
+          /* bağlantı kaydı ikincil */
+        });
       navigate(`/proje/${id}/sonuc`);
     } catch (e) {
       setHata(turkceHata(e));
@@ -118,18 +141,26 @@ export function CizimSayfasi() {
     return (
       <>
         <HataKutusu mesaj={hata} />
-        <KontrolEkrani
-          analiz={analiz}
-          setAnaliz={setAnaliz}
-          ornek={ornek}
-          v={v}
-          setV={setV}
-          ekler={ekler}
-          setEkler={setEkler}
-          onizle={onizle}
-          aktar={() => void aktar()}
-          aktariliyor={aktariliyor}
-        />
+        <EkranHatasi
+          hataOlunca={() => {
+            // Hak düştükten sonra kontrol ekranı açılamadı: hak otomatik iade edilir.
+            if (analizId)
+              void analizIade(analizId).then(() => istemci.invalidateQueries({ queryKey: ['hak'] }));
+          }}
+        >
+          <KontrolEkrani
+            analiz={analiz}
+            setAnaliz={setAnaliz}
+            ornek={ornek}
+            v={v}
+            setV={setV}
+            ekler={ekler}
+            setEkler={setEkler}
+            onizle={onizle}
+            aktar={() => void aktar()}
+            aktariliyor={aktariliyor}
+          />
+        </EkranHatasi>
       </>
     );
   }
@@ -138,6 +169,18 @@ export function CizimSayfasi() {
     <section className="kart" aria-labelledby="cizim-baslik">
       <h1 id="cizim-baslik">{ornek ? 'Örnek çizimle dene' : 'Çizimden maliyet analizi'}</h1>
       <HataKutusu mesaj={hata} />
+      {hata?.startsWith('Analiz hakkın kalmadı') && (
+        <p>
+          <Link to="/paketler">Paketlere git</Link>
+        </p>
+      )}
+      {!ornek && hak.data && (
+        <p>
+          Kalan analiz hakkın: <b>{hak.data.kalan}</b>. Hak, çizim başarıyla okunup kontrol ekranı açılınca
+          düşer; çizim okunamazsa düşmez.
+        </p>
+      )}
+      {ornek && <p className="not">Örnek çizimle deneme ücretsizdir; analiz hakkından düşmez.</p>}
       <div className="izgara">
         <MetinAlani etiket="Proje adı" deger={v.ad} degistir={(ad) => setV({ ...v, ad })} />
         <SecimAlani

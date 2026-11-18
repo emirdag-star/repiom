@@ -2,7 +2,7 @@
 // Kullanım: pnpm db:start && pnpm env:yerel
 // Yalnız yerel geliştirme içindir; üretim anahtarları bu yolla yazılmaz.
 import { execSync } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -37,3 +37,12 @@ if (!url || !anahtar) {
 const hedef = join(kok, 'apps', 'web', '.env.local');
 writeFileSync(hedef, `VITE_SUPABASE_URL=${url}\nVITE_SUPABASE_PUBLISHABLE_KEY=${anahtar}\n`, 'utf8');
 console.log(`Yazıldı: apps/web/.env.local (${url})`);
+
+// Sunucu fonksiyonlarının yerel ayarı (sahte iyzico). Varsa dokunulmaz (gerçek sandbox anahtarları yazılmış olabilir).
+const fonk = join(kok, 'supabase', 'functions', '.env');
+if (!existsSync(fonk)) {
+  copyFileSync(join(kok, 'supabase', 'functions', '.env.example'), fonk);
+  console.log(
+    'Yazıldı: supabase/functions/.env (sahte iyzico). Etkinleşmesi için: pnpm db:stop && pnpm db:start',
+  );
+}

@@ -157,3 +157,23 @@ textarea {
   width: 100%;
   min-height: 80px;
 }
+
+.izin-listesi {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.izin-listesi li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.izin-listesi p {
+  margin: 4px 0 0;
+}

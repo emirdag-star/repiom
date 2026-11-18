@@ -48,8 +48,10 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Sunucu fonksiyonları için yerel ayar (sahte iyzico; gerçek anahtar yok)
+        run: cp supabase/functions/.env.example supabase/functions/.env
       - name: Yerel Supabase'i başlat
-        run: pnpm exec supabase start -x studio,imgproxy,vector,logflare,edge-runtime,postgres-meta,supavisor,mailpit
+        run: pnpm exec supabase start -x studio,imgproxy,vector,logflare,postgres-meta,supavisor,mailpit
       - name: Veritabanı ve RLS testleri (pgTAP)
         run: pnpm db:test
       - name: Web uygulaması bağlantı ayarı

@@ -6,6 +6,8 @@ import { OnaySaglayici } from './components/OnayPenceresi';
 import { Yerlesim } from './components/Yerlesim';
 import { BulunamadiSayfasi } from './pages/BulunamadiSayfasi';
 import { CizimSayfasi } from './pages/CizimSayfasi';
+import { HesapSayfasi } from './pages/HesapSayfasi';
+import { PaketlerSayfasi } from './pages/PaketlerSayfasi';
 import { GirisSayfasi } from './pages/GirisSayfasi';
 import { KayitSayfasi } from './pages/KayitSayfasi';
 import { ProjeAkisiSayfasi } from './pages/ProjeAkisiSayfasi';
@@ -29,6 +31,8 @@ const yonlendirici = createBrowserRouter([
           { path: '/proje/:projeId/:adim', element: <ProjeAkisiSayfasi /> },
           { path: '/yonetici', element: <YoneticiSayfasi /> },
           { path: '/cizim', element: <CizimSayfasi /> },
+          { path: '/paketler', element: <PaketlerSayfasi /> },
+          { path: '/hesap', element: <HesapSayfasi /> },
         ],
       },
       { path: '*', element: <BulunamadiSayfasi /> },

@@ -9,7 +9,7 @@ export default tseslint.config(
     ignores: [
       '**/dist/**',
       '**/coverage/**',
-      '**/node_modules/**',
+      '**/node_modules/**', '**/.vite/**', '**/generated/**',
       '**/reference/**',
       '**/supabase/functions/**',
     ],

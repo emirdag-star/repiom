@@ -1,0 +1,5 @@
+pnpm-lock.yaml
+packages/core/reference/
+supabase/migrations/
+**/dist/
+**/coverage/

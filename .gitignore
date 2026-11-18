@@ -1,0 +1,29 @@
+# Bağımlılıklar ve derleme çıktıları
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.vite/
+playwright-report/
+test-results/
+
+# Gizli bilgiler — ASLA commit etme
+.env
+.env.*
+!.env.example
+supabase/anahtarlar.json
+supabase/kurulum.ps1
+supabase/.temp/
+supabase/.branches/
+
+# Üçüncü kişilere ait çizimler ve ikili veriler
+*.dxf
+*.DXF
+*.pkl
+
+# Editör / işletim sistemi
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

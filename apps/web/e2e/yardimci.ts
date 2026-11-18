@@ -8,15 +8,17 @@ export function yeniEposta(etiket: string): string {
 
 export async function kayitOl(page: Page, eposta: string, sifre = SIFRE) {
   await page.goto('/kayit');
-  await page.getByLabel('E-posta').fill(eposta);
+  await page.getByLabel('E-posta', { exact: true }).fill(eposta);
   await page.getByLabel('Şifre', { exact: true }).fill(sifre);
   await page.getByLabel('Şifre (tekrar)').fill(sifre);
+  await page.getByRole('checkbox', { name: /Kullanıcı Sözleşmesi/ }).check();
+  await page.getByRole('checkbox', { name: /KVKK Aydınlatma Metni/ }).check();
   await page.getByRole('button', { name: 'Kayıt ol' }).click();
 }
 
 export async function girisYap(page: Page, eposta: string, sifre = SIFRE) {
   await page.goto('/giris');
-  await page.getByLabel('E-posta').fill(eposta);
+  await page.getByLabel('E-posta', { exact: true }).fill(eposta);
   await page.getByLabel('Şifre').fill(sifre);
   await page.getByRole('button', { name: 'Giriş yap' }).click();
 }

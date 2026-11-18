@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'faz-*']
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  kontrol:
+    name: Lint, tip kontrolü, birim testleri, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  veritabani-ve-e2e:
+    name: Veritabanı (pgTAP) ve uçtan uca testler
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Yerel Supabase'i başlat
+        run: pnpm exec supabase start -x studio,imgproxy,vector,logflare,edge-runtime,postgres-meta,supavisor,mailpit
+      - name: Veritabanı ve RLS testleri (pgTAP)
+        run: pnpm db:test
+      - name: Web uygulaması bağlantı ayarı
+        run: pnpm env:yerel
+      - name: Playwright tarayıcısı
+        run: pnpm --filter @repiom/web exec playwright install --with-deps chromium
+      - name: Uçtan uca testler (masaüstü ve telefon)
+        run: pnpm e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-raporu
+          path: apps/web/playwright-report/
+          retention-days: 7
+      - if: always()
+        run: pnpm exec supabase stop --no-backup

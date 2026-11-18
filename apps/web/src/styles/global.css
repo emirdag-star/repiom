@@ -1,0 +1,374 @@
+/* REPİO(M) açık tema. Renkler prototipten (kaynak/stil.css); kontrastlar WCAG AA'ya göre seçildi. */
+:root {
+  --ana: #1f2937; /* antrasit */
+  --vurgu: #f0692b; /* turuncu: yalnız logo ve süs; yazı zemini olarak kullanma */
+  --vurgu-koyu: #c2410c; /* düğme zemini: beyaz yazıyla 5,2:1 */
+  --vurgu-acik: #fb9a6b; /* koyu zeminde turuncu yazı */
+  --zemin: #f3f4f6;
+  --kart: #ffffff;
+  --cizgi: #d1d5db;
+  --soluk: #4b5563;
+  --hata: #b91c1c;
+  --hata-zemin: #fef2f2;
+  --odak: #fdba8c;
+  --yaricap: 10px;
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ana);
+  background: var(--zemin);
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+.marka {
+  font-family: 'Space Grotesk', Inter, 'Segoe UI', sans-serif;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 24px;
+  margin: 0 0 16px;
+}
+
+h2 {
+  font-size: 19px;
+  margin: 0 0 10px;
+}
+
+a {
+  color: var(--vurgu-koyu);
+}
+
+:focus-visible {
+  outline: 3px solid var(--odak);
+  outline-offset: 2px;
+}
+
+/* ---------- Üst şerit ---------- */
+.atla {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.atla:focus {
+  left: 8px;
+}
+
+.ust-serit {
+  background: var(--ana);
+  color: #fff;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.marka-baglanti {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  text-decoration: none;
+  min-height: 44px;
+}
+
+.marka {
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.marka span {
+  color: var(--vurgu-acik);
+}
+
+.alt-baslik {
+  font-size: 13px;
+  color: #d1d5db;
+  flex: 1;
+  min-width: 160px;
+}
+
+.ust-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.ust-menu a {
+  color: #fff;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ust-menu a.active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.kullanici {
+  font-size: 13px;
+  color: #d1d5db;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+main:focus {
+  outline: none;
+}
+
+/* ---------- Kartlar ve düzen ---------- */
+.kart {
+  background: var(--kart);
+  border: 1px solid var(--cizgi);
+  border-radius: var(--yaricap);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.kart.dar {
+  max-width: 440px;
+  margin: 24px auto;
+}
+
+.sayfa-baslik {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.sayfa-baslik h1 {
+  margin: 0;
+}
+
+.izgara {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.satir {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.not {
+  font-size: 13px;
+  color: var(--soluk);
+}
+
+.bos-durum p {
+  margin: 0;
+  color: var(--soluk);
+}
+
+.proje-listesi {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.proje-listesi li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.yukleniyor {
+  color: var(--soluk);
+}
+
+/* ---------- Formlar ---------- */
+.alan {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--soluk);
+}
+
+input,
+select {
+  font: inherit;
+  padding: 10px;
+  border: 1px solid #6b7280;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ana);
+  min-height: 44px;
+  width: 100%;
+}
+
+input[aria-invalid='true'] {
+  border-color: var(--hata);
+}
+
+.alan-aciklama {
+  margin: 0;
+  font-size: 12px;
+  color: var(--soluk);
+}
+
+.alan-hata {
+  margin: 0;
+  font-size: 13px;
+  color: var(--hata);
+}
+
+.hata-kutusu {
+  background: var(--hata-zemin);
+  color: var(--hata);
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.form-alti {
+  margin: 16px 0 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ---------- Düğmeler ---------- */
+button,
+.dugme {
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--ana);
+  background: #fff;
+  color: var(--ana);
+  cursor: pointer;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+button.birincil,
+.dugme.birincil {
+  background: var(--vurgu-koyu);
+  border-color: var(--vurgu-koyu);
+  color: #fff;
+}
+
+button.genis {
+  width: 100%;
+}
+
+button.koyu {
+  background: transparent;
+  color: #fff;
+  border-color: #9ca3af;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- Adımlar ---------- */
+.adimlar ol {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.adimlar a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--cizgi);
+  background: #fff;
+  color: var(--soluk);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.adimlar a.active {
+  background: var(--ana);
+  border-color: var(--ana);
+  color: #fff;
+}
+
+.adim-no {
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  main {
+    padding: 14px 12px 70px;
+  }
+
+  .kart {
+    padding: 14px;
+  }
+
+  .alt-baslik {
+    display: none;
+  }
+
+  .kullanici {
+    max-width: 150px;
+  }
+}

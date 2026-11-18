@@ -83,6 +83,27 @@ export function ProjelerimSayfasi() {
           </button>
         </div>
       </div>
+      <section className="kart vurgu" aria-labelledby="cizim-kart-baslik">
+        <div className="altbaslik">
+          <div>
+            <h2 id="cizim-kart-baslik">
+              Çizimden maliyet <span className="etiket">ücretli modül</span>
+            </h2>
+            <p className="not">
+              Mimari ve statik DXF'ini yükle: katlar, mahal listesi, kaplamalar, beton-kalıp-donatı ve
+              kapı-pencere çizimden çıkarılır, maliyet buna göre hesaplanır. Çizim bu cihazda okunur.
+            </p>
+          </div>
+          <div className="ekle">
+            <Link className="dugme" to="/cizim?ornek=1">
+              Örnek çizimle dene
+            </Link>
+            <Link className="dugme birincil" to="/cizim">
+              Çizim yükle
+            </Link>
+          </div>
+        </div>
+      </section>
       {mesaj && (
         <div className="basari" role="status">
           {mesaj}

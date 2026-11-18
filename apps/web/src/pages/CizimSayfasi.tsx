@@ -10,11 +10,14 @@ import { EkranHatasi } from '../cizim/EkranHatasi';
 import { KontrolEkrani, type EkKalem } from '../cizim/KontrolEkrani';
 import type { AnalizSonucu } from '../cizim/mesajlar';
 import { useDxfIsci, type Ilerleme } from '../cizim/useDxfIsci';
+import { fiyatlariUygula, yzKontrol, type YzDurumu } from '../cizim/yapayZeka';
+import { BelgeBaglantisi } from '../components/Belge';
 import { HataKutusu } from '../components/HataKutusu';
 import { MetinAlani, SayiAlani, SecimAlani } from '../components/form';
 import { analizBaslat, analizIade, analizProjeyeBagla, sha256, useHak } from '../lib/abonelik';
 import { aktifFiyatListesi } from '../lib/fiyat';
 import { turkceHata } from '../lib/hatalar';
+import { onayKaydet } from '../lib/onaylar';
 import { ozetCikar, projeOlustur } from '../lib/projeler';
 
 const ILLER = PROVINCES.map((p) => p.ad);
@@ -69,6 +72,9 @@ export function CizimSayfasi() {
   const [hata, setHata] = useState<string | null>(null);
   const [aktariliyor, setAktariliyor] = useState(false);
   const [analizId, setAnalizId] = useState<number | null>(null);
+  // Yapay zekâ kontrolü isteğe bağlı: varsayılan kapalı; işaretlemek yurt dışına aktarım açık rızasıdır.
+  const [yzIzin, setYzIzin] = useState(false);
+  const [yz, setYz] = useState<YzDurumu | null>(null);
   const istemci = useQueryClient();
   const hak = useHak(!ornek);
 
@@ -84,15 +90,32 @@ export function CizimSayfasi() {
       const dosyalar = [mimari, statik]
         .filter((f): f is File => Boolean(f))
         .map((f) => ({ ad: f.name, boyut: f.size }));
-      setAnalizId(await analizBaslat(v.ad.trim() || 'Çizim analizi', ornek ? [] : dosyalar, ornek, ozetler));
+      const id = await analizBaslat(v.ad.trim() || 'Çizim analizi', ornek ? [] : dosyalar, ornek, ozetler);
+      setAnalizId(id);
       void istemci.invalidateQueries({ queryKey: ['hak'] });
       setAnaliz(a);
-      setEkler(
-        ekListesi(dxf.projectFromAnalysis(a, v.ad, { katYuksekligi: v.H, donatiKgM3: v.donati, il: v.il })),
+      const varsayilan = ekListesi(
+        dxf.projectFromAnalysis(a, v.ad, { katYuksekligi: v.H, donatiKgM3: v.donati, il: v.il }),
       );
+      setEkler(varsayilan);
+      setYz(null);
+      if (!ornek && yzIzin) void yzCalistir(id, a, varsayilan);
       window.scrollTo(0, 0);
     } catch (e) {
       setHata(turkceHata(e));
+    }
+  };
+
+  /** Analiz başına tek yapay zekâ çağrısı; başarısız olursa varsayılan tahmini fiyatlar kalır. */
+  const yzCalistir = async (id: number, a: AnalizSonucu, varsayilan: EkKalem[]) => {
+    setYz({ durum: 'bekliyor', notlar: [] });
+    try {
+      await onayKaydet(['acik_riza_yurtdisi']);
+      const r = await yzKontrol(id, a, v.il, varsayilan, onizle);
+      setEkler((l) => fiyatlariUygula(l, varsayilan, r.fiyatlar));
+      setYz({ durum: 'tamam', notlar: r.notlar });
+    } catch (e) {
+      setYz({ durum: 'hata', notlar: [], mesaj: turkceHata(e) });
     }
   };
 
@@ -157,6 +180,7 @@ export function CizimSayfasi() {
             ekler={ekler}
             setEkler={setEkler}
             onizle={onizle}
+            yz={yz}
             aktar={() => void aktar()}
             aktariliyor={aktariliyor}
           />
@@ -235,6 +259,24 @@ export function CizimSayfasi() {
           <p className="not">
             AutoCAD'den DXF olarak kaydet. Tüm katlar tek dosyada yan yana olabilir. Çizim bu cihazda okunur;
             sunucuya gönderilmez.
+          </p>
+          <div className="onay-satiri">
+            <input
+              id="dx-yz"
+              type="checkbox"
+              checked={yzIzin}
+              aria-describedby="dx-yz-aciklama"
+              onChange={(e) => setYzIzin(e.target.checked)}
+            />
+            <label htmlFor="dx-yz">Yapay zekâ kontrolü de yapılsın (isteğe bağlı)</label>
+          </div>
+          <p id="dx-yz-aciklama" className="not">
+            İşaretlersen kat planlarının yazısız görüntüleri (en çok 6) ile mahal ve alan özeti, kontrol
+            notları ve yeni kalem fiyat tahmini için yurt dışındaki yapay zekâ servisine (Anthropic, ABD)
+            gönderilir. Proje adı, antet, isimler ve ada-parsel gönderilmez. Kutuyu işaretlemek{' '}
+            <BelgeBaglantisi id="acik_riza_yurtdisi" /> onayı anlamına gelir; onayı istediğin zaman Hesabım
+            sayfasından geri alabilirsin. İşaretlemezsen analiz yine yapılır; yeni kalemlere varsayılan
+            tahmini fiyatlar konur.
           </p>
         </>
       )}

@@ -49,4 +49,11 @@ Excel raporunun LibreOffice ile yeniden hesap testi için bir kez `docker build 
 
 ## Güvenlik
 
-Gizli anahtarlar yalnız ortam değişkenlerinde tutulur ve depoya girmez. Gerçek proje çizimleri (`*.dxf`) üçüncü kişilere aittir; depoya eklenmez.
+Gizli anahtarlar yalnız ortam değişkenlerinde tutulur ve depoya girmez. Sunucu fonksiyonlarının yerel ayarı `supabase/functions/.env` dosyasındadır (`.env.example`'dan kopyalanır, depoya girmez); yerelde ödeme ve yapay zekâ sahte servislerle çalışır.
+
+### Yapay zekâ adımını gerçek anahtarla denemek (bir kez, yerelde)
+
+1. `supabase/functions/.env` içinde `ANTHROPIC_API_KEY=` satırına gerçek anahtarı yaz; `ANTHROPIC_BASE_URL` ve `SAHTE_CLAUDE` satırlarını sil.
+2. `docker restart supabase_edge_runtime_repiom` ile fonksiyonları yeniden başlat.
+3. Kendi çiziminle "Çizim yükle" → "Yapay zekâ kontrolü de yapılsın" kutusunu işaretle → analizi başlat. Kullanım Yönetici sayfasında görünür.
+4. Bitince dosyayı `.env.example`'daki sahte değerlere geri döndür. Gerçek proje çizimleri (`*.dxf`) üçüncü kişilere aittir; depoya eklenmez.

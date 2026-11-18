@@ -9,6 +9,7 @@ import { SayiAlani } from '../components/form';
 import { sayi } from '../lib/bicim';
 import type { Varsayimlar } from '../pages/CizimSayfasi';
 import type { AnalizSonucu } from './mesajlar';
+import type { YzDurumu } from './yapayZeka';
 
 export interface EkKalem {
   bk: string;
@@ -37,6 +38,8 @@ interface Ozellikler {
     bolge: [number, number, number, number],
     isaret: { x: number; y: number }[],
   ) => Promise<Blob | null>;
+  /** Yapay zekâ kontrolü (istenmediyse null). */
+  yz?: YzDurumu | null;
   aktar: () => void;
   aktariliyor: boolean;
 }
@@ -106,6 +109,7 @@ export function KontrolEkrani(o: Ozellikler) {
             </div>
           ))}
         </div>
+        {o.yz && <YapayZekaNotlari yz={o.yz} />}
       </section>
       <section className="kart" aria-label="Okunan bilgiler">
         <div className="sekmeler" role="tablist" aria-label="Kontrol sekmeleri">
@@ -546,5 +550,39 @@ function Ayarlar({ v, setV }: Ozellikler) {
         yerine geçer; çizimden çıkmayan kalemler (mekanik, elektrik, genel giderler) formülle hesaplanır.
       </p>
     </>
+  );
+}
+
+function YapayZekaNotlari({ yz }: { yz: YzDurumu }) {
+  return (
+    <section className="yz-kutu" aria-labelledby="yz-baslik" aria-busy={yz.durum === 'bekliyor'}>
+      <h2 id="yz-baslik">Yapay zekâ kontrolü</h2>
+      <div role="status" aria-live="polite">
+        {yz.durum === 'bekliyor' && (
+          <p>Yapay zekâ kontrolü yapılıyor… Bu sırada okunanları inceleyebilirsin.</p>
+        )}
+        {yz.durum === 'hata' && (
+          <p className="uyari">
+            {yz.mesaj ?? 'Yapay zekâ kontrolü yapılamadı.'} Analiz etkilenmez; yeni kalemlerde varsayılan
+            tahmini fiyatlar kullanılır.
+          </p>
+        )}
+        {yz.durum === 'tamam' &&
+          (yz.notlar.length ? (
+            <ul>
+              {yz.notlar.map((n, i) => (
+                <li key={i}>{n}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>Yapay zekâ bir tutarsızlık bulmadı.</p>
+          ))}
+        {yz.durum === 'tamam' && (
+          <p className="not">
+            Notlar ve fiyat tahminleri yapay zekâ önerisidir; kontrol edip karar vermek sana aittir.
+          </p>
+        )}
+      </div>
+    </section>
   );
 }

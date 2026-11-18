@@ -372,3 +372,418 @@ button:disabled {
     max-width: 150px;
   }
 }
+
+/* ---------- Faz 3: akış, sonuç tablosu, projeler ---------- */
+.gizli {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+h3 {
+  font-size: 16px;
+  margin: 18px 0 10px;
+}
+
+h4 {
+  font-size: 14px;
+  margin: 12px 0 8px;
+  color: var(--soluk);
+}
+
+button.kucuk,
+.dugme.kucuk {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+button.baglanti {
+  background: none;
+  border: none;
+  padding: 0 2px;
+  min-height: 0;
+  color: var(--vurgu-koyu);
+  text-decoration: underline;
+  font-weight: 600;
+  display: inline;
+}
+
+button.tehlikeli {
+  background: var(--hata);
+  border-color: var(--hata);
+  color: #fff;
+}
+
+button.buyuk {
+  font-size: 17px;
+  padding: 14px 26px;
+}
+
+label.onay {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ana);
+  min-height: 44px;
+  cursor: pointer;
+}
+
+label.onay input {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  accent-color: var(--vurgu-koyu);
+}
+
+.izgara.onaylar {
+  gap: 4px 14px;
+}
+
+.sekmeler {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.sekmeler button {
+  padding: 8px 14px;
+}
+
+.sekmeler button.aktif {
+  background: var(--vurgu-koyu);
+  border-color: var(--vurgu-koyu);
+  color: #fff;
+}
+
+.sekmeler button.ikincil-dugme {
+  border-style: dashed;
+}
+
+.altkart {
+  border: 1px solid var(--cizgi);
+  border-radius: var(--yaricap);
+  padding: 14px;
+  margin-bottom: 12px;
+  background: #fafafa;
+}
+
+.altbaslik {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.altbaslik h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.daire-satir {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.daire-satir .alan {
+  margin-bottom: 8px;
+}
+
+.daire-satir > button {
+  margin-bottom: 8px;
+}
+
+.ekle {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.kart.sablon {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.kart.sablon > div {
+  flex: 1 1 280px;
+}
+
+.bilgi {
+  background: #eef2f7;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.uyari {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.basari {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.proje-ust {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.proje-adi {
+  margin: 0 0 4px;
+  font-size: 22px;
+  overflow-wrap: anywhere;
+}
+
+.kayit-durum {
+  font-size: 13px;
+  color: var(--soluk);
+  display: inline-flex;
+  gap: 8px;
+}
+
+.kayit-durum.hata {
+  color: var(--hata);
+}
+
+/* Sonuç */
+.kartlar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.olcu {
+  background: #fff;
+  border: 1px solid var(--cizgi);
+  border-radius: var(--yaricap);
+  padding: 14px 16px;
+}
+
+.olcu .e {
+  font-size: 12px;
+  color: var(--soluk);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.olcu .d {
+  font-family: 'Space Grotesk', Inter, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.olcu .a {
+  font-size: 13px;
+  color: var(--soluk);
+}
+
+.indir {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.satir.ust-bosluksuz {
+  margin: 0 0 10px;
+}
+
+.kaydir {
+  overflow-x: auto;
+  max-width: 100%;
+  /* İçindeki ekran okuyucu metinleri (position: absolute) sayfayı yatayda taşırmasın. */
+  position: relative;
+}
+
+.kaydir:focus-visible {
+  outline: 3px solid var(--odak);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+}
+
+th,
+td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--soluk);
+  background: #f9fafb;
+}
+
+td.s,
+th.s {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+tr.toplam td {
+  font-weight: 700;
+  border-top: 2px solid var(--ana);
+}
+
+.kalem-tablosu {
+  min-width: 760px;
+}
+
+tr.grup td {
+  background: #e5e7eb;
+  font-weight: 700;
+}
+
+.grup-dugme {
+  background: none;
+  border: none;
+  padding: 0;
+  min-height: 32px;
+  font-weight: 700;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.grup-dugme::before {
+  content: '▾ ';
+  color: var(--soluk);
+  margin-right: 4px;
+}
+
+.grup-dugme[aria-expanded='false']::before {
+  content: '▸ ';
+}
+
+tr.ops td {
+  color: #4b5563;
+  font-style: italic;
+}
+
+input.hucre {
+  min-width: 96px;
+  width: 120px;
+  text-align: right;
+  min-height: 36px;
+  padding: 6px 8px;
+}
+
+input.hucre.elle {
+  background: #fff2cc;
+  border-color: #b45309;
+}
+
+/* Projelerim */
+.proje-karti h2 {
+  font-size: 18px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.proje-karti-ust {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.proje-ozeti {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px 16px;
+  margin: 12px 0;
+}
+
+.proje-ozeti dt {
+  font-size: 12px;
+  color: var(--soluk);
+}
+
+.proje-ozeti dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.islemler {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Onay penceresi */
+.onay-penceresi {
+  border: none;
+  border-radius: var(--yaricap);
+  padding: 20px;
+  max-width: min(440px, calc(100vw - 32px));
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.onay-penceresi::backdrop {
+  background: rgba(17, 24, 39, 0.5);
+}
+
+.onay-penceresi h2 {
+  margin-top: 0;
+}
+
+@media (max-width: 600px) {
+  .daire-satir {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .daire-satir > button {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .olcu .d {
+    font-size: 20px;
+  }
+}

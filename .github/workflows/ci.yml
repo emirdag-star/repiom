@@ -25,11 +25,15 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: LibreOffice (Excel raporunun yeniden hesap testi için)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libreoffice-calc-nogui
       - run: pnpm format:check
       - run: pnpm gen:check
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+        env:
+          REQUIRE_LIBREOFFICE: '1'
       - run: pnpm build
 
   veritabani-ve-e2e:

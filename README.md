@@ -29,7 +29,10 @@ Yerelde e-posta doğrulaması kapalıdır; kayıt olunca doğrudan giriş yapıl
 | `pnpm test`      | Birim testleri (Vitest)                                  |
 | `pnpm db:test`   | Veritabanı ve RLS testleri (pgTAP); Supabase açık olmalı |
 | `pnpm e2e`       | Uçtan uca testler, masaüstü ve telefon (Playwright)      |
+| `pnpm gen:check` | Formül dosyası `veri.js` ile güncel mi                   |
 | `pnpm build`     | Üretim derlemesi                                         |
+
+Excel raporunun LibreOffice ile yeniden hesap testi için bir kez `docker build -t repiom-libreoffice tools/libreoffice` çalıştır (ya da LibreOffice'i kur); imaj yoksa bu test yerelde atlanır, CI'da her zaman çalışır.
 
 `pnpm db:reset` veritabanını sıfırlar ve `supabase/seed.sql` verisini yeniden yükler.
 

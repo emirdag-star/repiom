@@ -87,24 +87,6 @@ test('aynı e-postayla ikinci kayıt engellenir', async ({ page }) => {
   await expect(page.getByRole('alert')).toContainText('zaten var');
 });
 
-test('7 adımlı akışın boş ekranları arasında gezilebilir', async ({ page }) => {
-  await kayitOl(page, yeniEposta('akis'));
-  await page.getByRole('link', { name: 'Yeni proje' }).click();
-  await expect(page.getByRole('heading', { name: '1. Proje' })).toBeVisible();
-  for (const [no, ad] of [
-    [2, 'Daire tipleri'],
-    [3, 'Katlar'],
-    [4, 'Diğer bilgiler'],
-    [5, 'Proje geneli'],
-    [6, 'Özet'],
-    [7, 'Sonuç'],
-  ] as const) {
-    await page.getByRole('link', { name: `${ad} →` }).click();
-    await expect(page.getByRole('heading', { name: `${no}. ${ad}` })).toBeVisible();
-  }
-  await yatayTasmaYok(page);
-});
-
 test('yönetici olmayan kullanıcı yönetici ekranını göremez', async ({ page }) => {
   await kayitOl(page, yeniEposta('normal'));
   await expect(page.getByRole('heading', { name: 'Projelerim' })).toBeVisible();

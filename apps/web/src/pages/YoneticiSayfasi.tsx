@@ -9,6 +9,7 @@ import { tarihGun, useAktifFiyatListesi } from '../lib/fiyat';
 import { turkceHata } from '../lib/hatalar';
 import { useYoneticiMi } from '../lib/yonetici';
 import { OdemeYonetimi } from './yonetici/OdemeYonetimi';
+import { YapayZekaKullanimi } from './yonetici/YapayZekaKullanimi';
 import {
   dosyaIndir,
   fiyatListesiEkleYayinla,
@@ -45,6 +46,7 @@ export function YoneticiSayfasi() {
       <h1 id="yonetici-baslik">Yönetici</h1>
       <FiyatListeleri />
       <OdemeYonetimi />
+      <YapayZekaKullanimi />
     </section>
   );
 }

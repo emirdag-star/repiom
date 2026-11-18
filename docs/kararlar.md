@@ -85,3 +85,14 @@ Her satır: karar — gerekçe. Ürün kararları burada değil; onlar ürün sa
 - Hesap silme: talep anında RLS ile proje yazımı ve yeni analiz/ödeme kapanır; yönetici onayı `hesap-sil` fonksiyonuyla (ödeme kayıtlarındaki fatura bilgisi silinir, kullanıcı ve bağlı veriler silinir). Not: fatura kayıtlarının yasal saklama yükümlülüğü (VUK) mali müşavir/avukatla netleştirilmeli.
 - Hukuki metinler `packages/core/src/legal/belgeler.ts` (prototipten aynen; TASLAK, şirket bilgileri yer tutucu). Sözleşme pencereleri `<dialog>` ile.
 - Fonksiyonların yerel ayarı `supabase/functions/.env` (örnek: `.env.example`, gerçek anahtar içermez); CI aynı dosyayı kopyalar ve Edge Runtime'ı başlatır.
+
+## Faz 7
+
+- Yapay zekâ adımı isteğe bağlı ve varsayılan kapalı: çizim yükleme ekranındaki kutu işaretlenince açık rıza (yurt dışına aktarım) güncel sürümle kaydedilir; rıza sunucuda (`yz_hakki_al`) yeniden denetlenir. Rıza yoksa analiz yine yapılır, yeni kalemler varsayılan tahmini fiyatla gelir.
+- Analiz başına tek çağrı: hak, Claude'a gidilmeden önce veritabanında atomik alınır; çağrı başarısız olsa da ikinci deneme yok (maliyet denetimi). Örnek çizimle denemede ve 1 saatten eski analizde yapay zekâ yok.
+- Gizlilik iki katmanlı: istemci yalnız yazısız plan görselleri (en çok 6, hesaba dahil katlar) ve `aiSummary` özetini gönderir; sunucu fonksiyonu özeti izin listesiyle yeniden süzer (mahal/kaplama/kat türü sözlükte yoksa "Tanınmayan mahal"/"Diğer", yeni kalem adları kalıpla). Proje adı, pafta başlıkları, antet, isim, ada-parsel gitmez. Sınır: çizimde yazı "patlatılıp" çizgiye çevrilmişse görselde şekil olarak kalabilir.
+- Claude çağrısı resmi SDK ile (`npm:@anthropic-ai/sdk@1.10.0`), model `claude-sonnet-5-5` (`YZ_MODEL`), yapılandırılmış JSON çıktı (şema), effort orta; sunucu tarafı yedek model (server-side fallback) açık: güvenlik sınıflandırıcısı reddederse istek sunucuda uygun modelle yeniden denenir. Yanıt sunucuda süzülür: en çok 8 not, fiyat yalnız istenen kalemler için ve pozitif.
+- Token kullanımı (girdi/çıktı, model, görsel sayısı, hata) `dxf_analizleri.yz_token`'a yazılır; yönetici sayfasında son 30 gün özeti.
+- Yapay zekâ fiyatı, kullanıcının elle değiştirmediği kalemlere uygulanır ve açıklamaya gerekçesiyle yazılır; raporda "(tahmini fiyat)" etiketi sürer.
+- Testler `test-claude` sahte servisiyle (SAHTE_CLAUDE=1 değilse kapalı; üretime yayınlanmaz). Gerçek anahtarla bir deneme ürün sahibiyle yapılacak.
+- Savunma katmanı: Supabase'in varsayılan yetkileriyle `authenticated` rolüne verilen tablo yazma izinleri Faz 6 tablolarında açıkça kaldırıldı (RLS zaten engelliyordu); SQL testi bunu denetler.

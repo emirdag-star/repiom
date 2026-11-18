@@ -23,6 +23,8 @@ insert into auth.users (id, aud, role, email, email_confirmed_at) values
   ('22222222-2222-2222-2222-222222222222', 'authenticated', 'authenticated', 'mehmet@ornek.test', now()),
   ('33333333-3333-3333-3333-333333333333', 'authenticated', 'authenticated', 'yonetici-odeme@ornek.test', now());
 insert into public.yonetici_epostalar (email) values ('yonetici-odeme@ornek.test');
+-- Önceki çalıştırmalardan kalan paket fiyatlarından bağımsız başla.
+update public.paketler set fiyat = 0, aktif = true;
 create temp table x (ad text primary key, id bigint) on commit drop;
 grant all on x to authenticated, service_role;
 

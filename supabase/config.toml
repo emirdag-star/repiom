@@ -435,3 +435,7 @@ verify_jwt = false
 # Yalnız yerel/test: sahte iyzico (SAHTE_IYZICO=1 değilse kapalı). Üretime yayınlanmaz.
 [functions.test-iyzico]
 verify_jwt = false
+
+# Yalnız yerel/test: sahte Claude API (SAHTE_CLAUDE=1 değilse kapalı). Üretime yayınlanmaz.
+[functions.test-claude]
+verify_jwt = false

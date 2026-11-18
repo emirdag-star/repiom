@@ -36,3 +36,17 @@ Her satır: karar — gerekçe. Ürün kararları burada değil; onlar ürün sa
 - Girdi (`ProjectInput`) ve sonuç alan adları prototiple aynı (Türkçe) — prototipte kaydedilmiş projeler ve rapor/arayüz kodu değişmeden uyumlu kalsın; fonksiyon adları İngilizce.
 - Üç katmanlı doğrulama: (1) her formül 300 rastgele girdide prototiple aynı, (2) v4'ün 588 değeri, (3) 7 sabit + 300 rastgele projede tüm sonuç nesnesi prototip motoruyla aynı.
 - `core/src` için ESLint, Node/tarayıcı/React/Supabase bağımlılığını yasaklıyor — paket web, mobil ve sunucuda aynen çalışsın.
+
+## Faz 3
+
+- Excel için ExcelJS, PDF için pdfmake (`packages/report`) — Excel'de canlı formül, stil, gizli satır; PDF'i tarayıcıda yazdırma penceresi olmadan doğrudan dosya olarak üretmek için. İkisi de web'de yalnız indirme düğmesine basınca yükleniyor.
+- Excel düzeni prototipteki gibi: metraj ve birim fiyat değer, tutar = metraj × fiyat formül, ara toplamlar SUM, KDV oranı Özet!B16'dan (değiştirilebilir). Özet'teki inşaat alanı yuvarlanmadan yazılıyor — m² maliyeti motorla kuruşu kuruşuna aynı çıksın.
+- LibreOffice testi: rapor yalnız formüllerle (önbellek değeri olmadan) yazılıp LibreOffice'te yeniden hesaplatılıyor; tüm sayfalarda hata hücresi aranıyor ve toplamlar motorla kuruş düzeyinde karşılaştırılıyor. Yerelde `tools/libreoffice` Docker imajı, CI'da apt paketi kullanılıyor (`REQUIRE_LIBREOFFICE=1` ile CI'da atlanamaz).
+- ExcelJS, dosyada `<v>0</v>` olan formül sonucunu okurken düşürüyor; bu yüzden hata/sonuç denetimi doğrudan XML üzerinden yapılıyor.
+- PDF yazı tipi Roboto (pdfmake ile gelen; Türkçe karakterleri içeriyor).
+- Sayı alanları `type="text" inputMode="decimal"`: Türkçe yazım esas — virgül ondalık, nokta binlik ("6.000" = 6000). Tarayıcıların sayı alanı davranışı dile göre değiştiği için kendi ayrıştırıcımız (`sayiOku`).
+- Geçersiz sayı (ör. KDV "abc" ya da 150) forma kaydedilmiyor, alanın altında Türkçe hata gösteriliyor — motorun NaN üretmesi arayüzde engellendi; motor prototiple aynı kaldı.
+- Otomatik kayıt: değişiklikten 0,8 sn sonra; sayfa gizlenir/kapanırken bekleyen değişiklik `fetch(keepalive)` ile PostgREST'e gönderiliyor (64 KB altı). Proje oluşturulurken özet de hesaplanıp kaydediliyor (Projelerim listesi hemen dolu görünsün).
+- Projenin girdisi `projeler.girdi` alanında prototiple aynı JSON biçiminde; eski/eksik kayıtlar açılırken tamamlanıyor (`girdiyiTamamla`).
+- Onay soruları `<dialog>` ile (tarayıcının confirm penceresi yerine) — erişilebilir ve uygulamanın görünümüyle uyumlu.
+- Erişilebilirlik: Playwright + axe-core ile WCAG 2.1 A/AA taraması (giriş, kayıt, Projelerim, 7 adım).

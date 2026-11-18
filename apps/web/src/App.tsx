@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import { AuthProvider } from './auth/AuthProvider';
 import { OturumGerekli } from './auth/OturumGerekli';
+import { OnaySaglayici } from './components/OnayPenceresi';
 import { Yerlesim } from './components/Yerlesim';
 import { BulunamadiSayfasi } from './pages/BulunamadiSayfasi';
 import { GirisSayfasi } from './pages/GirisSayfasi';
@@ -37,7 +38,9 @@ export function App() {
   return (
     <QueryClientProvider client={sorguIstemcisi}>
       <AuthProvider>
-        <RouterProvider router={yonlendirici} />
+        <OnaySaglayici>
+          <RouterProvider router={yonlendirici} />
+        </OnaySaglayici>
       </AuthProvider>
     </QueryClientProvider>
   );

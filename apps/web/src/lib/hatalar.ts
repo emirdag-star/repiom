@@ -45,6 +45,8 @@ export function turkceHata(hata: unknown): string {
     // Sunucu fonksiyonlarımız zaten Türkçe mesaj üretir; onu tercih et.
     return /[çğıöşüİ]/i.test(mesaj) ? mesaj : PG_KODLARI[kod];
   }
+  // Kodsuz ve Türkçe yazılmış hata: uygulamanın kendi mesajıdır, olduğu gibi gösterilir.
+  if (!kod && /[çğıöşüİ]/i.test(mesaj)) return mesaj;
   if (
     h.name === 'AuthRetryableFetchError' ||
     h.status === 0 ||

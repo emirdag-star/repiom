@@ -1,4 +1,6 @@
 /**
- * @repiom/report — Excel (canlı formüllü) ve PDF rapor üretimi. Faz 3'te doldurulacak.
+ * @repiom/report — Excel (canlı formüllü) ve PDF rapor üretimi.
  */
-export { REPORT_TITLE } from '@repiom/core';
+export { REPORT_TITLE, REPORT_NOTE, reportFileName, formatDate, formatNumber } from './common';
+export { buildExcel, type ExcelOptions } from './excel';
+export { buildPdfDefinition, type PdfOptions } from './pdf';

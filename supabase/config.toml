@@ -439,3 +439,11 @@ verify_jwt = false
 # Yalnız yerel/test: sahte Claude API (SAHTE_CLAUDE=1 değilse kapalı). Üretime yayınlanmaz.
 [functions.test-claude]
 verify_jwt = false
+
+# Mağaza iade bildirimleri (Apple/Google çağırır; kimlik mağaza API'sinden yeniden doğrulanır).
+[functions.magaza-bildirim]
+verify_jwt = false
+
+# Yalnız yerel/test: sahte App Store / Google Play API (SAHTE_MAGAZA=1 değilse kapalı). Üretime yayınlanmaz.
+[functions.test-magaza]
+verify_jwt = false

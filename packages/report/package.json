@@ -14,6 +14,13 @@
     "build": "tsc --noEmit"
   },
   "dependencies": {
-    "@repiom/core": "workspace:*"
+    "@repiom/core": "workspace:*",
+    "exceljs": "^4.4.0",
+    "pdfmake": "^0.3.14"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/pdfmake": "^0.3.3",
+    "jszip": "3.10.2"
   }
 }

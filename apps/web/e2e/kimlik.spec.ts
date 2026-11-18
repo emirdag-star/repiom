@@ -106,5 +106,5 @@ test('yönetici listesindeki e-posta yönetici ekranını görür', async ({ pag
   }
   await expect(projelerim).toBeVisible();
   await page.getByRole('link', { name: 'Yönetici' }).click();
-  await expect(page.getByRole('heading', { name: 'Fiyat listeleri' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Yayındaki fiyat listesi' })).toBeVisible();
 });

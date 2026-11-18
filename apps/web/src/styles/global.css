@@ -787,3 +787,28 @@ input.hucre.elle {
     font-size: 20px;
   }
 }
+
+/* ---------- Faz 4: yönetici ---------- */
+.etiket {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.fark-tablosu {
+  min-width: 680px;
+}
+
+td.buyuk-degisim {
+  color: #92400e;
+  font-weight: 700;
+}
+
+input[type='file'] {
+  padding: 8px;
+}

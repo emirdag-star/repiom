@@ -43,3 +43,19 @@ export {
   siteBlockTemplate,
 } from './engine/templates';
 export { BLOCK_LAST_INDEX, COEFFICIENTS, INPUTS, ITEMS, PROVINCES, type ItemDef } from './generated/formulas';
+export {
+  diffPrices,
+  effectivePrice,
+  extractNewPrices,
+  MAX_UNIT_PRICE,
+  mergePrices,
+  parseLocaleNumber,
+  PRICE_TABLE_ERROR,
+  priceItemByCode,
+  priceItems,
+  type PriceDiff,
+  type PriceItem,
+  type PriceItemHeader,
+  type PriceList,
+  type SheetRows,
+} from './prices';

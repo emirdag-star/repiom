@@ -8,12 +8,9 @@ function indir(veri: BlobPart, ad: string, tur: string) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([veri], { type: tur }));
   a.download = ad;
-  document.body.appendChild(a);
+  // Bağlantı sayfaya eklenmeden tıklanır (ekran okuyucular metinsiz bir bağlantı görmesin).
   a.click();
-  setTimeout(() => {
-    URL.revokeObjectURL(a.href);
-    a.remove();
-  }, 1000);
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
 export async function excelIndir(s: CalculationResult, p: ProjectInput) {

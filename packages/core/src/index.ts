@@ -60,3 +60,4 @@ export {
   type SheetRows,
 } from './prices';
 export * as dxf from './dxf';
+export * from './legal/belgeler';

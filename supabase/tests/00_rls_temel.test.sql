@@ -84,9 +84,9 @@ reset role;
 
 -- ---------- 5. Onaylar: kişi yalnız kendi adına ekler, kayıt değiştirilemez ----------
 select pg_temp.giris('11111111-1111-1111-1111-111111111111');
-insert into public.onaylar (belge, surum, tarayici) values ('kvkk_aydinlatma', '1.0', 'test');
+insert into public.onaylar (belge, surum, tarayici) values ('kvkk_aydinlatma', '2026-11-taslak-1', 'test');
 select throws_ok(
-  $$ insert into public.onaylar (kullanici, belge, surum) values ('22222222-2222-2222-2222-222222222222', 'kvkk_aydinlatma', '1.0') $$,
+  $$ insert into public.onaylar (kullanici, belge, surum) values ('22222222-2222-2222-2222-222222222222', 'kvkk_aydinlatma', '2026-11-taslak-1') $$,
   '42501', null, 'Başkası adına onay eklenemez');
 select throws_ok($$ update public.onaylar set onay = false $$, '42501', null, 'Onay kaydı değiştirilemez');
 reset role;

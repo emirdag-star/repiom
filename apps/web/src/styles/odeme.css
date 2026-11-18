@@ -1,0 +1,179 @@
+/* ---------- Faz 6: onaylar, belgeler, paketler, hesap ---------- */
+.onaylar-kutusu {
+  border: 1px solid var(--cizgi);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 0 0 16px;
+}
+
+.onaylar-kutusu legend {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--soluk);
+  padding: 0 4px;
+}
+
+.onay-satiri {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 4px 8px;
+  align-items: start;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.onay-satiri input {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  margin-top: 2px;
+  accent-color: var(--vurgu-koyu);
+}
+
+.onay-satiri label {
+  font-size: 14px;
+  color: var(--ana);
+  font-weight: 400;
+}
+
+.onay-satiri .alan-hata {
+  grid-column: 2;
+}
+
+.zorunlu {
+  color: var(--hata);
+  font-size: 12px;
+}
+
+.belge-penceresi {
+  border: none;
+  border-radius: var(--yaricap);
+  padding: 20px;
+  width: min(760px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.belge-penceresi::backdrop {
+  background: rgba(17, 24, 39, 0.5);
+}
+
+.belge-metin {
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.paketler {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.paket {
+  border: 1px solid var(--cizgi);
+  border-radius: var(--yaricap);
+  padding: 16px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.paket h3 {
+  margin: 0;
+}
+
+.paket p {
+  margin: 0;
+}
+
+.paket.secili {
+  border-color: var(--vurgu-koyu);
+  box-shadow: 0 0 0 2px var(--vurgu-koyu) inset;
+}
+
+.paket .fiyat {
+  font-family: 'Space Grotesk', Inter, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.banka {
+  background: #f9fafb;
+  border: 1px dashed var(--cizgi);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 0;
+}
+
+.banka dt {
+  font-size: 12px;
+  color: var(--soluk);
+}
+
+.banka dd {
+  margin: 0 0 8px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.radyo-grubu {
+  border: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.radyo-grubu legend {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--soluk);
+  margin-bottom: 4px;
+}
+
+.radyo-grubu label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  font-size: 14px;
+  color: var(--ana);
+}
+
+.radyo-grubu input {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  accent-color: var(--vurgu-koyu);
+}
+
+textarea {
+  font: inherit;
+  padding: 10px;
+  border: 1px solid #6b7280;
+  border-radius: 8px;
+  width: 100%;
+  min-height: 80px;
+}
+
+.izin-listesi {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.izin-listesi li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.izin-listesi p {
+  margin: 4px 0 0;
+}

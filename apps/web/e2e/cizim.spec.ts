@@ -3,11 +3,12 @@ import AxeBuilder from '@axe-core/playwright';
 import { dxf } from '@repiom/core';
 import { expect, test, type Page } from '@playwright/test';
 import { writeFileSync } from 'node:fs';
-import { kayitOl, yatayTasmaYok, yeniEposta } from './yardimci';
+import { hakVer, kayitOl, yatayTasmaYok, yeniEposta } from './yardimci';
 
 async function giris(page: Page) {
   await kayitOl(page, yeniEposta('cizim'));
   await expect(page.getByRole('heading', { name: 'Projelerim' })).toBeVisible();
+  await hakVer(page);
 }
 
 async function tara(page: Page, yer: string) {

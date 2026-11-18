@@ -71,3 +71,17 @@ Her satır: karar — gerekçe. Ürün kararları burada değil; onlar ürün sa
 - PROTOTİPTEN FARK 2 — mimaride aynı kat iki kez çizilmişse uyarı veriliyor ve kontrol ekranında kat "hesaba dahil" işaretiyle dışarıda bırakılabiliyor. Kullanıcı bir şey yapmazsa sonuç prototiple aynı. (Ürün sahibi onayladı, 18.11.2026.)
 - Kurgusal örnek çizim üreticisi TypeScript'te (`example.ts`); varsayılan çıktı prototipin Python üreticisiyle bayt bayt aynı. Ücretsiz deneme bu çizimi kullanıyor; testler için birim, yazım biçimi, kopya kat, çok blok çeşitlemeleri var. Gerçek DXF'ler depoya girmez (`.gitignore`: `*.dxf`).
 - Analiz hakkı (sunucuda düşme) ve yapay zekâ adımı bu fazda yok: Faz 6 ve 7'de eklenecek; şimdilik modül oturum açmış herkese açık.
+
+## Faz 6
+
+- Ürün kararları (ürün sahibi, 18.11.2026): hak iadesi = teknik hatada otomatik + 14 gün içinde kullanılmamış pakette cayma (yönetici onayı) + yönetici elle; hesap silme = talep → kilit → yönetici onayı → silme, ödeme kayıtları anonim; e-fatura/e-arşiv sonraya; yönetici e-postası şimdilik yer tutucu.
+- Hak defteri "parti" mantığıyla (`hak_hareketleri`): her satın alma/elle tanım bir parti; analiz süresi en yakın biten partiden düşer; iade ve cayma aynı partiye yazılır. Böylece "hiç analiz yapılmamış paket" kesin denetlenir; defter yalnız eklenir (silinmez).
+- Hak, çizim cihazda başarıyla okunduktan sonra ve kontrol ekranı açılmadan hemen önce sunucuda düşer (`analiz_baslat`). Kontrol ekranı bir hata yüzünden çizilemezse 1 saat içinde otomatik iade (`analiz_iade`); projeye aktarılmış analiz iade edilmez.
+- Ücretsiz deneme, istemcinin "deneme" demesine güvenmez: sunucu yalnız hazır örnek çizimin SHA-256 parmak izleriyle kabul eder (`ornek_cizim_ozetleri`; core testi kodla tutarlılığını denetler). Not: çizim analizi tasarım gereği tarayıcıda yapıldığından, kodu değiştiren bir kullanıcı analizi yerelde çalıştırabilir; sunucu denetimi olağan yolun kötüye kullanımını engeller.
+- Kayıt onayları sunucuda: `signUp` ile gelen onay listesi `auth.users` tetikleyicisinde denetlenir; zorunlular yoksa kayıt reddedilir; onaylar belgelerin güncel sürümüyle ve tarayıcı bilgisiyle saklanır. Onay yalnız güncel sürümle eklenebilir; sürüm değişince `eksik_onaylar` yeniden onay ister (eski sürümle verilmiş isteğe bağlı izinler de geçersiz sayılır).
+- Ödeme kaydı tek veritabanı fonksiyonunda (`odeme_olustur`): paket satışta mı, fatura (TCKN 11 / VKN 10 + vergi dairesi, adres), son 1 saatte Ön Bilgilendirme ve Mesafeli Satış onayı, bekleyen ödeme sınırı. Kart ödemesi de aynı fonksiyonu kullanıcının oturumuyla çağırır.
+- Kart: iyzico Checkout Form; onay yalnız `odeme-sonuc` fonksiyonunun iyzico'dan SUNUCUDA sorguladığı sonuçla (durum, tutar, conversationId). Dönüş adresi izinli kaynak listesiyle sınırlı.
+- Testler için `test-iyzico` sahte servisi (SAHTE_IYZICO=1 değilse kapalı; üretime yayınlanmaz). Gerçek sandbox anahtarlarıyla deneme ürün sahibiyle yapılacak.
+- Hesap silme: talep anında RLS ile proje yazımı ve yeni analiz/ödeme kapanır; yönetici onayı `hesap-sil` fonksiyonuyla (ödeme kayıtlarındaki fatura bilgisi silinir, kullanıcı ve bağlı veriler silinir). Not: fatura kayıtlarının yasal saklama yükümlülüğü (VUK) mali müşavir/avukatla netleştirilmeli.
+- Hukuki metinler `packages/core/src/legal/belgeler.ts` (prototipten aynen; TASLAK, şirket bilgileri yer tutucu). Sözleşme pencereleri `<dialog>` ile.
+- Fonksiyonların yerel ayarı `supabase/functions/.env` (örnek: `.env.example`, gerçek anahtar içermez); CI aynı dosyayı kopyalar ve Edge Runtime'ı başlatır.

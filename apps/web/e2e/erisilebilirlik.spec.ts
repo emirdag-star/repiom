@@ -48,4 +48,13 @@ test('Projelerim ve 7 adım', async ({ page }) => {
   await page.getByRole('navigation', { name: 'Ana menü' }).getByRole('link', { name: 'Projelerim' }).click();
   await expect(page.getByRole('heading', { name: 'Projelerim' })).toBeVisible();
   await tara(page, 'Projelerim');
+  await page.getByRole('navigation', { name: 'Ana menü' }).getByRole('link', { name: 'Paketler' }).click();
+  await expect(page.getByRole('heading', { name: 'Paketler ve analiz hakları' })).toBeVisible();
+  await tara(page, 'Paketler');
+  await page.getByRole('navigation', { name: 'Ana menü' }).getByRole('link', { name: 'Hesap' }).click();
+  await expect(page.getByRole('heading', { name: 'Hesap ayarları' })).toBeVisible();
+  await tara(page, 'Hesap ayarları');
+  await page.getByRole('button', { name: 'Kullanıcı Sözleşmesi' }).first().click();
+  await expect(page.getByRole('dialog', { name: 'Kullanıcı Sözleşmesi' })).toBeVisible();
+  await tara(page, 'Belge penceresi');
 });

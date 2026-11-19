@@ -35,6 +35,7 @@ Yerelde e-posta doğrulaması kapalıdır; kayıt olunca doğrudan giriş yapıl
 | `pnpm e2e:mobil`                                   | Mobil uygulamanın uçtan uca testleri (web derlemesinde, telefon görünümü)      |
 | `pnpm yedek` / `pnpm yedek:geri-yukle <dosya>`     | Ek mantıksal döküm (şifreli). Asıl yedek sunucuda sürekli: `docs/yayin.md`     |
 | `pnpm yayin:denetim --ortam <dosya>`               | Yayın öncesi eksikleri listeler                                                |
+| `node scripts/imaj.mjs [--gonder]`                 | Sunucu imajlarını derle (ve registry.sargin.me'ye gönder)                      |
 | `pnpm yayinla --ssh <kullanici@sunucu> [--uygula]` | Kendi sunucumuza yayın (varsayılan kuru çalışır) — `docs/yayin.md`             |
 | `pnpm gen:check`                                   | Formül dosyası `veri.js` ile güncel mi                                         |
 | `pnpm build`                                       | Üretim derlemesi                                                               |

@@ -6,6 +6,9 @@
 # Supabase'in resmi kendi-sunucu kurulumundan (docker/, Apache-2.0) sadeleştirildi: realtime, depolama, günlük toplama
 # ve havuz (pooler) kullanılmadığı için yok. Sürümler, testlerin çalıştığı yerel Supabase sürümleriyle aynı.
 # Ayarlar: sunucu/.env (şablon: .env.example, `node anahtar-uret.mjs` ile üretilir). .env depoya GİRMEZ.
+# İmajlar: registry.sargin.me/repiom/{db,fonksiyonlar,yonlendirici}:${SURUM}. Sunucuda yalnız bu dosya ve .env gerekir:
+#   docker compose pull && docker compose up -d
+# Derleme ve gönderme (geliştirme bilgisayarında): node scripts/imaj.mjs [--gonder]  → SURUM = git kısa özeti.
 name: repiom
 
 x-db-ortak: &db-ortak
@@ -43,8 +46,10 @@ x-db-ortak: &db-ortak
 
 services:
   db:
-    build: ./db
-    image: repiom/db:17.12
+    build:
+      context: ..
+      dockerfile: sunucu/db/Dockerfile
+    image: registry.sargin.me/repiom/db:${SURUM:-latest}
     restart: unless-stopped
     environment:
       <<: *db-ortak
@@ -62,7 +67,7 @@ services:
     shm_size: 256m
 
   yedekci:
-    image: repiom/db:17.12
+    image: registry.sargin.me/repiom/db:${SURUM:-latest}
     restart: unless-stopped
     user: postgres
     entrypoint: ['/usr/local/bin/repiom-yedekci.sh']
@@ -139,17 +144,14 @@ services:
       retries: 20
 
   goc:
-    image: repiom/db:17.12
+    # Migration'lar ve göç betiği veritabanı imajının içinde (/goc).
+    image: registry.sargin.me/repiom/db:${SURUM:-latest}
     restart: 'no'
     entrypoint: ['sh', '/goc/goc.sh']
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: postgres
       ILK_VERI: ${ILK_VERI:-1}
-    volumes:
-      - ../supabase/migrations:/goc/migrations:ro
-      - ./goc/goc.sh:/goc/goc.sh:ro
-      - ./goc/ilk-veri.sql:/goc/ilk-veri.sql:ro
     depends_on:
       auth:
         condition: service_healthy
@@ -179,17 +181,17 @@ services:
       retries: 20
 
   functions:
-    image: public.ecr.aws/supabase/edge-runtime:v1.79.1
+    # Fonksiyonlar ve yönlendirici imajın içinde; test fonksiyonları (test-*) imaja girmez.
+    build:
+      context: ..
+      dockerfile: sunucu/fonksiyonlar/Dockerfile
+    image: registry.sargin.me/repiom/fonksiyonlar:${SURUM:-latest}
     restart: unless-stopped
     depends_on:
       goc:
         condition: service_completed_successfully
     mem_limit: ${FONKSIYON_BELLEK:-1g}
-    command:
-      ['start', '--user-worker-request-idle-timeout', '150000', '--main-service', '/home/deno/yonlendirici']
     volumes:
-      - ../supabase/functions:/home/deno/functions:ro
-      - ./fonksiyonlar/main:/home/deno/yonlendirici:ro
       - deno-onbellek:/root/.cache/deno
     environment:
       VERIFY_JWT: 'false'
@@ -223,12 +225,7 @@ services:
     build:
       context: ..
       dockerfile: sunucu/yonlendirici/Dockerfile
-      args:
-        VITE_SUPABASE_URL: ${SITE_URL}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${ANON_KEY}
-        VITE_SENTRY_DSN: ${WEB_SENTRY_DSN:-}
-        YEREL: ${YEREL_DENEME:-0}
-    image: repiom/yonlendirici:latest
+    image: registry.sargin.me/repiom/yonlendirici:${SURUM:-latest}
     restart: unless-stopped
     depends_on:
       auth:
@@ -241,6 +238,14 @@ services:
       # Üretim: alan adı (ör. repiom.com.tr) → 80/443, otomatik sertifika. Yerel deneme: http://localhost:8080
       SITE_ADRESI: ${SITE_ADRESI:?SITE_ADRESI gerekli}
       ACME_EPOSTA: ${ACME_EPOSTA:?ACME_EPOSTA gerekli (Let's Encrypt sertifika bildirimleri)}
+      # Web uygulamasının çalışma zamanı ayarı (/ayar.js; gizli değil) — imaj her ortamda aynı kalır.
+      SITE_URL: ${SITE_URL}
+      ANON_KEY: ${ANON_KEY}
+      WEB_SENTRY_DSN: ${WEB_SENTRY_DSN:-}
+      ORTAM: ${ORTAM:-uretim}
+      SURUM: ${SURUM:-latest}
+      # Yalnız yerel deneme: "-yerel" → HTTPS'e zorlama ve HSTS başlıkları olmadan
+      BASLIK_EKI: ${BASLIK_EKI:-}
     ports:
       - '${HTTP_PORTU:-80}:80'
       - '${HTTPS_PORTU:-443}:443'

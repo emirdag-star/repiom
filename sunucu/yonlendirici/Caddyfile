@@ -39,9 +39,15 @@
 {$SITE_ADRESI} {
 	encode zstd gzip
 	import api
+	# Çalışma zamanı ayarı (gizli değil): imaj her ortamda aynı, değerler ortam değişkenlerinden.
+	handle /ayar.js {
+		header Content-Type "application/javascript; charset=utf-8"
+		header Cache-Control "no-store"
+		respond `window.REPIOM_AYAR = {"supabaseUrl":"{$SITE_URL}","anahtar":"{$ANON_KEY}","sentryDsn":"{$WEB_SENTRY_DSN}","ortam":"{$ORTAM:uretim}","surum":"{$SURUM:}"};`
+	}
 	handle {
 		root * /srv/web
-		import /etc/caddy/basliklar.caddy
+		import /etc/caddy/basliklar{$BASLIK_EKI}.caddy
 		@html path / /index.html
 		header @html Cache-Control "no-cache"
 		try_files {path} /index.html

@@ -22,4 +22,6 @@ done
 if [ "${ILK_VERI:-0}" = "1" ]; then
   psql -v ON_ERROR_STOP=1 -q -f /goc/ilk-veri.sql
 fi
+# PostgREST şema önbelleğini yenile (yeni tablo/fonksiyonlar hemen görünsün).
+psql -q -c "notify pgrst, 'reload schema'"
 echo "Göç tamam."

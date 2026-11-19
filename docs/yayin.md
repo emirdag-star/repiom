@@ -3,13 +3,13 @@
 Kararlar (ürün sahibi, 20.11.2026): uygulama **Türkiye'deki kendi sunucumuzda** Docker Compose ile çalışır
 (veritabanı, kimlik, API, sunucu fonksiyonları ve web aynı sunucuda); yedekler **sürekli** (birkaç dakikalık en çok
 veri kaybı) ve sunucu dışı kopya **Cloudflare R2 (AB)**; hata kaydı Sentry (AB); kullanım ölçümü çerezsiz, kendi
-sayaçlarımız; GitHub yok (kod SSH ile doğrudan sunucuya gider); alan adı ve e-posta servisi henüz yok.
+sayaçlarımız; imajlar **registry.sargin.me**'de (sunucuda kaynak kod yok); alan adı ve e-posta servisi henüz yok.
 
 Kurulum dosyaları `sunucu/` klasöründe; ayrıntılar aşağıda.
 
 ## 0. Yayından önce kapanması gerekenler (engelleyici)
 
-`pnpm yayin:denetim --ortam <sunucu/.env kopyası>` bunları denetler (yayın betiği bunu sunucuda kendisi çalıştırır).
+`pnpm yayin:denetim` bunları denetler; yayın betiği depo denetimini bu bilgisayarda, `.env` denetimini sunucuda yapar.
 
 1. **Avukat:** hukuki metinler (TASLAK / [AVUKAT] notları), şirket bilgileri (`packages/core/src/legal/belgeler.ts` →
    `SIRKET`). Yurt dışına aktarım artık yalnız şunlar için: **Cloudflare R2 (şifreli yedek, AB)**, **Sentry (hata kaydı,
@@ -36,25 +36,24 @@ bağlantı havuzu kullanılmadığı için kurulmaz.
 
 ## 2. Sunucunun ilk kurulumu (bir kez)
 
-Önerilen en az: 4 çekirdek, 8 GB bellek, 80 GB SSD, Ubuntu 24.04.
+Önerilen en az: 4 çekirdek, 8 GB bellek, 80 GB SSD, Ubuntu 24.04. Sunucuda **kaynak kod bulunmaz**: yalnız
+`compose.yaml`, `geri-yukle.sh` ve `.env` (imajlar `registry.sargin.me/repiom/*`).
 
-1. **Güvenlik:** yalnız SSH anahtarıyla giriş (parola kapalı), güvenlik duvarında yalnız 22, 80, 443 açık; otomatik
-   güvenlik güncellemeleri (`unattended-upgrades`); Docker günlükleri için boyut sınırı (`/etc/docker/daemon.json`:
-   `"log-opts": {"max-size": "50m", "max-file": "5"}`).
-2. **Docker** (resmi depo) ve `git` kur.
-3. Kod deposu (GitHub yerine sunucuda çıplak depo):
-
-```bash
-sudo mkdir -p /opt/repiom.git /opt/repiom && sudo chown $USER /opt/repiom.git /opt/repiom
-git init --bare /opt/repiom.git && git clone /opt/repiom.git /opt/repiom
-```
-
-Bu bilgisayarda bir kez: `git remote add sunucu ssh://<kullanici>@<sunucu>/opt/repiom.git` ve `git push sunucu main`,
-sonra sunucuda `cd /opt/repiom && git pull`. 4. **Ayarlar:** `cd /opt/repiom/sunucu && docker run --rm -v "$PWD":/s -w /s node:24-alpine node anahtar-uret.mjs > .env`
-→ `.env` içindeki boşları doldur (alan adı, SMTP, R2, iyzico, Anthropic, Apple/Google, Sentry). `chmod 600 .env`.
-**`YEDEK_SIFRESI`'ni ayrıca parola yöneticisine kaydet** — kaybolursa yedekler açılamaz. 5. **Başlat:** `docker compose up -d --build` → `docker compose ps` (hepsi "healthy"). İlk açılışta migration'lar ve
-ilk fiyat listesi yüklenir, ilk tam yedek alınır. 6. **Yönetici e-postası** (bir kez):
-`docker compose exec db psql -U postgres -c "insert into public.yonetici_epostalar (email) values ('<adres>')"`.
+- **Güvenlik:** yalnız SSH anahtarıyla giriş (parola kapalı); güvenlik duvarında yalnız 22, 80, 443 açık; otomatik
+  güvenlik güncellemeleri (`unattended-upgrades`); Docker günlüklerine boyut sınırı (`/etc/docker/daemon.json`:
+  `"log-opts": {"max-size": "50m", "max-file": "5"}`).
+- **Docker** (resmi depo) kur; `sudo mkdir -p /opt/repiom && sudo chown $USER /opt/repiom`.
+- **Kayıt (registry) erişimi:** sunucuda `docker login registry.sargin.me` — **yalnız okuma** yetkili bir hesapla.
+  Bu bilgisayarda gönderme için ayrı, yazma yetkili hesapla `docker login registry.sargin.me`.
+- **Ayarlar:** bu bilgisayardan `scp sunucu/anahtar-uret.mjs sunucu/.env.example <kullanici@sunucu>:/opt/repiom/`, sonra
+  sunucuda `cd /opt/repiom && docker run --rm -v "$PWD":/s -w /s node:24-alpine node anahtar-uret.mjs > .env` →
+  boşları doldur (alan adı, SMTP, R2, iyzico, Anthropic, Apple/Google, Sentry) → `chmod 600 .env` →
+  `rm anahtar-uret.mjs`. **`.env`'in tamamını (özellikle `YEDEK_SIFRESI`) parola yöneticisine kaydet** — kaybolursa
+  yedekler açılamaz.
+- **İlk yayın:** bu bilgisayarda `pnpm yayinla --ssh <kullanici@sunucu> --uygula` (3. bölüm). İlk açılışta
+  migration'lar ve ilk fiyat listesi yüklenir, ilk tam yedek alınır.
+- **Yönetici e-postası** (bir kez, sunucuda):
+  `docker compose exec db psql -U postgres -c "insert into public.yonetici_epostalar (email) values ('<adres>')"`.
 
 ## 3. Yayın (her güncellemede)
 
@@ -62,9 +61,12 @@ ilk fiyat listesi yüklenir, ilk tam yedek alınır. 6. **Yönetici e-postası**
 pnpm yayinla --ssh <kullanici@sunucu>
 ```
 
-Kuru çalışır; adımları okuyup onaylayınca sonuna `--uygula` eklenir. Sıra: testler → `git push sunucu main` →
-sunucuda `git pull` → **sunucuda yayın denetimi** (engel varsa durur) → **anlık yedek** → `docker compose up -d --build`
-(migration otomatik) → durum.
+Kuru çalışır; adımları okuyup onaylayınca sonuna `--uygula` eklenir. Sıra: testler ve depo denetimi → imajları derle
+ve **registry.sargin.me'ye gönder** (etiket = git kısa özeti) → `compose.yaml` ve `geri-yukle.sh`'yi sunucuya kopyala
+→ **sunucuda `.env` denetimi** (engel varsa durur) → **anlık yedek** → `.env`'de `SURUM`'u güncelle →
+`docker compose pull` → `docker compose up -d` (migration otomatik) → durum.
+
+Yalnız imaj derlemek / göndermek için: `node scripts/imaj.mjs` (derle) · `node scripts/imaj.mjs --gonder`.
 
 Mobil uygulamanın sunucu adresi `https://<alan-adı>`; anahtar `ANON_KEY` (gizli değildir):
 
@@ -107,16 +109,16 @@ cd apps/mobile; npx eas-cli@latest build --platform all --profile production
 ### Geri yükleme
 
 ```bash
-cd /opt/repiom/sunucu && ./geri-yukle.sh "2026-11-20 14:35:00+03"
+cd /opt/repiom && ./geri-yukle.sh "2026-11-20 14:35:00+03"
 ```
 
 Belirtilen dakikaya döner (`son` yazılırsa arşivdeki en son ana). Betik önce şimdiki durumun yedeğini alır, servisleri
 durdurur, yalnız değişen dosyaları geri yükler, WAL kayıtlarını hedef ana kadar oynatır, servisleri başlatır ve yeni bir
 tam yedek alır. Hedef andan sonraki tüm değişiklikler (ödemeler dahil) geri alınır: bakım duyurusuyla ve iki kişiyle.
 
-**Sunucu tamamen kaybolursa:** yeni sunucuda 2. bölümdeki kurulum, **aynı `.env`** (özellikle `YEDEK_SIFRESI`,
-`JWT_SECRET`, `ANON_KEY`, `SERVICE_ROLE_KEY`, R2 bilgileri) → `docker compose up -d db` yerine önce
-`./geri-yukle.sh son` → `docker compose up -d`. Bu yüzden `.env`'in şifreli bir kopyası sunucu dışında (parola
+**Sunucu tamamen kaybolursa:** yeni sunucuda 2. bölümdeki hazırlık, **aynı `.env`** (özellikle `YEDEK_SIFRESI`,
+`JWT_SECRET`, `ANON_KEY`, `SERVICE_ROLE_KEY`, R2 bilgileri, `SURUM`) → `compose.yaml` ve `geri-yukle.sh`'yi kopyala →
+`docker compose pull` → `./geri-yukle.sh son --onayli` → `docker compose up -d`. Bu yüzden `.env`'in şifreli bir kopyası sunucu dışında (parola
 yöneticisinde) tutulmalı.
 
 ### Aylık geri yükleme denemesi (zorunlu alışkanlık)
@@ -137,7 +139,8 @@ silinen kayıt hedef dakikaya dönülerek geri geldi, hedef andan sonraki kayıt
 
 ## 7. Geri dönüş (hatalı yayın)
 
-- Kod: sunucuda `git checkout <önceki sürüm> && cd sunucu && docker compose up -d --build`.
+- Uygulama: sunucuda `.env`'de `SURUM`'u önceki etikete al → `docker compose pull && docker compose up -d`
+  (önceki imajlar registry'de durur).
 - Veritabanı migration'ı geri alınmaz; düzeltme migration'ı yazılır. Gerekirse yayın öncesi alınan anlık yedeğin
   zamanına `./geri-yukle.sh` ile dönülür.
 
@@ -145,8 +148,9 @@ silinen kayıt hedef dakikaya dönülerek geri geldi, hedef andan sonraki kayıt
 
 ```powershell
 cd sunucu; docker compose -f compose.yaml -f compose.yerel.yaml --env-file .env.yerel up -d --build
+# ya da derlenmiş imajlarla: $env:SURUM='<etiket>'; docker compose ... up -d --no-build
 ```
 
 `.env.yerel`: `node anahtar-uret.mjs` çıktısında `SITE_ADRESI=http://localhost:8080`, `SITE_URL=http://localhost:8080`,
-`SMTP_HOST=posta`, `SMTP_PORT=1025`, `YEREL_DENEME=1`, `YEDEK_DEPO_TURU=posix`, `YEDEK_DEPO_YOLU=/yedek-deposu`.
+`SMTP_HOST=posta`, `SMTP_PORT=1025`, `BASLIK_EKI=-yerel`, `YEDEK_DEPO_TURU=posix`, `YEDEK_DEPO_YOLU=/yedek-deposu`.
 Web: http://localhost:8080 · e-postalar: http://localhost:8025. Bu dosya depoya girmez.

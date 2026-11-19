@@ -131,3 +131,6 @@ Her satır: karar — gerekçe. Ürün kararları burada değil; onlar ürün sa
 - Studio yalnız `--profile yonetim` ile ve yalnız 127.0.0.1'de (SSH tüneli).
 - Kod GitHub olmadan SSH ile sunucudaki çıplak depoya gönderilir; yayın betiği varsayılan kuru çalışır, sunucuda denetim + anlık yedek + `compose up --build`.
 - Yerelde doğrulandı: yığın ayağa kalktı; kayıt → Türkçe doğrulama e-postası → giriş → örnek proje → sonuç; test fonksiyonu dışarıdan 404; güvenlik başlıkları; arşiv ve ilk tam yedek; dakikaya geri dönüş (silinen kayıt geri geldi, sonraki kayıt geri alındı).
+- İmajlar **registry.sargin.me/repiom/{db,fonksiyonlar,yonlendirici}** (ürün sahibi, 20.11.2026); etiket = git kısa özeti, ayrıca `latest`. Sunucuda kaynak kod yok: yalnız `compose.yaml`, `geri-yukle.sh`, `.env`; yayın = `docker compose pull && up -d`, geri dönüş = önceki `SURUM`.
+- İmajlar ortamdan bağımsız: web uygulamasının sunucu adresi ve yayımlanabilir anahtarı açılışta `/ayar.js`'ten (Caddy, ortam değişkenlerinden) okunur; yerel deneme başlıkları `BASLIK_EKI=-yerel` ile seçilir. Migration'lar veritabanı imajında, fonksiyonlar ve yönlendirici fonksiyon imajında; `test-*` fonksiyonları üretim imajına girmez.
+- Yayın denetimi ikiye ayrıldı: depo denetimi bu bilgisayarda (`--yalniz-kod`), `.env` denetimi sunucuda (`--yalniz-ortam`, Node konteynerinde).

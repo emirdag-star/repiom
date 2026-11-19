@@ -5,14 +5,15 @@
  */
 import { kiritiyiAyikla, olayiAyikla } from '@repiom/istemci/hataKaydi';
 import * as Sentry from '@sentry/react';
+import { AYAR } from './ayar';
 
 export function hataKaydiniBaslat() {
-  const dsn = import.meta.env.VITE_SENTRY_DSN as string | undefined;
+  const dsn = AYAR.sentryDsn;
   if (!dsn) return;
   Sentry.init({
     dsn,
-    environment: (import.meta.env.VITE_ORTAM as string | undefined) ?? 'uretim',
-    release: (import.meta.env.VITE_SURUM as string | undefined) ?? undefined,
+    environment: AYAR.ortam,
+    release: AYAR.surum,
     // Kullanıcı, çerez, başlık, gövde ve sorgu dizgisi toplanmaz (süzgeç ayrıca ikinci katman).
     dataCollection: {
       userInfo: false,

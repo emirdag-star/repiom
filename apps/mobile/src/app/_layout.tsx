@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { Yukleniyor } from '../bilesenler/temel';
 import { R } from '../bilesenler/tema';
+import { HATA_KAYDI_ACIK, hataKaydiniBaslat, Sentry } from '../lib/hataKaydi';
 import { OturumSaglayici, useOturum } from '../lib/oturum';
 
 function Yollar() {
@@ -25,9 +26,10 @@ function Yollar() {
   );
 }
 
+hataKaydiniBaslat();
 olaySay('uygulama_acilis');
 
-export default function KokDuzen() {
+function KokDuzen() {
   const [istemci] = useState(
     () => new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } } }),
   );
@@ -40,3 +42,6 @@ export default function KokDuzen() {
     </QueryClientProvider>
   );
 }
+
+// Hata kaydı açıksa kök bileşen Sentry ile sarılır (yakalanmamış hatalar).
+export default HATA_KAYDI_ACIK ? Sentry.wrap(KokDuzen) : KokDuzen;

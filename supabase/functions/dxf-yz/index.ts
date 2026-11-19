@@ -6,6 +6,7 @@
 // Ortam: ANTHROPIC_API_KEY, YZ_MODEL (varsayılan claude-sonnet-5-5), ANTHROPIC_BASE_URL (yalnız test: sahte servis).
 import Anthropic from 'npm:@anthropic-ai/sdk@1.10.0';
 import { belirtec, cors, db, hata, kullanici, yanit } from '../_ortak/ortak.ts';
+import { hataBildir } from '../_ortak/hataKaydi.ts';
 
 const MODEL = Deno.env.get('YZ_MODEL') ?? 'claude-sonnet-5-5';
 const ANAHTAR = Deno.env.get('ANTHROPIC_API_KEY') ?? '';
@@ -232,6 +233,7 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     const durum = e instanceof Anthropic.APIError ? e.status : null;
+    if (durum === null || durum >= 500 || durum === 401) await hataBildir(e, 'dxf-yz');
     await db('rpc/yz_kaydet', {
       method: 'POST',
       govde: {

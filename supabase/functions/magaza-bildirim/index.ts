@@ -3,6 +3,7 @@
 // Ek katman: adres ?anahtar=MAGAZA_BILDIRIM_ANAHTARI ile çağrılmalı. "verify_jwt = false" (supabase/config.toml).
 import { db } from '../_ortak/ortak.ts';
 import { appleIslem, googleIptalMi, jwsGovde } from '../_ortak/magaza.ts';
+import { hataBildir } from '../_ortak/hataKaydi.ts';
 
 const ANAHTAR = Deno.env.get('MAGAZA_BILDIRIM_ANAHTARI') ?? '';
 const tamam = () => new Response('ok');
@@ -45,6 +46,7 @@ Deno.serve(async (req) => {
   } catch (e) {
     // 5xx: mağaza bildirimi daha sonra yeniden gönderir.
     console.error('magaza-bildirim', (e as Error).message);
+    await hataBildir(e, 'magaza-bildirim');
     return new Response('Geçici hata', { status: 503 });
   }
 });

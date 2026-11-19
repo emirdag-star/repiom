@@ -4,6 +4,7 @@
 // mağazada bitirir (finishTransaction, isConsumable: true).
 import { db, hata, kullanici, yanit } from '../_ortak/ortak.ts';
 import { appleIslem, googleSatin, MagazaHatasi } from '../_ortak/magaza.ts';
+import { hataBildir } from '../_ortak/hataKaydi.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok');
@@ -42,6 +43,7 @@ Deno.serve(async (req) => {
     if (e instanceof MagazaHatasi) return hata(req, e.durum, e.message);
     const durum = (e as { durum?: number }).durum;
     if (durum && durum < 500) return hata(req, 403, (e as Error).message);
+    await hataBildir(e, 'magaza-dogrula');
     return hata(
       req,
       502,

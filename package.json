@@ -26,7 +26,9 @@
     "e2e:mobil": "pnpm --filter @repiom/mobile e2e",
     "mobil": "pnpm --filter @repiom/mobile start",
     "yedek": "node scripts/yedek.mjs",
-    "yedek:geri-yukle": "node scripts/yedek-geri-yukle.mjs"
+    "yedek:geri-yukle": "node scripts/yedek-geri-yukle.mjs",
+    "yayin:denetim": "node scripts/yayin-denetimi.mjs",
+    "yayinla": "node scripts/yayinla.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

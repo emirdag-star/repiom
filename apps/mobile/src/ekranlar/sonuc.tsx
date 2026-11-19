@@ -3,6 +3,7 @@ import type { CalculationResult, ItemRow, ProjectInput } from '@repiom/core';
 import { sayi, tl } from '@repiom/istemci/bicim';
 import { turkceHata } from '@repiom/istemci/hatalar';
 import { sayiOku } from '@repiom/istemci/sayi';
+import { olaySay } from '@repiom/istemci/olcum';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { OnayKutusu } from '../bilesenler/form';
@@ -152,6 +153,7 @@ export function SonucAdimi({ editor, girdi, degistir, adimaGit }: AdimOzellikler
     });
   const indir = async (tur: 'excel' | 'pdf') => {
     setMesgul(tur);
+    olaySay(tur === 'excel' ? 'rapor:excel' : 'rapor:pdf');
     setHata(null);
     try {
       await (tur === 'excel' ? excelPaylas(s, girdi) : pdfPaylas(s, girdi));

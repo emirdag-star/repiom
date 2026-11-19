@@ -8,6 +8,10 @@ import './styles/odeme.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { olaySay } from '@repiom/istemci/olcum';
+import './lib/supabase';
+
+olaySay('uygulama_acilis');
 
 const kok = document.getElementById('root');
 if (!kok) throw new Error('Uygulama kök öğesi bulunamadı.');

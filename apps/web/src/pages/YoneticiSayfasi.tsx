@@ -9,6 +9,7 @@ import { tarihGun, useAktifFiyatListesi } from '../lib/fiyat';
 import { turkceHata } from '../lib/hatalar';
 import { useYoneticiMi } from '../lib/yonetici';
 import { OdemeYonetimi } from './yonetici/OdemeYonetimi';
+import { KullanimPanosu } from './yonetici/KullanimPanosu';
 import { YapayZekaKullanimi } from './yonetici/YapayZekaKullanimi';
 import {
   dosyaIndir,
@@ -44,6 +45,7 @@ export function YoneticiSayfasi() {
   return (
     <section aria-labelledby="yonetici-baslik">
       <h1 id="yonetici-baslik">Yönetici</h1>
+      <KullanimPanosu />
       <FiyatListeleri />
       <OdemeYonetimi />
       <YapayZekaKullanimi />

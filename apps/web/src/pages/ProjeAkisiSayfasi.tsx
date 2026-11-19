@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { olaySay, type Olay } from '@repiom/istemci/olcum';
+import { useEffect, type ReactNode } from 'react';
 import { Link, Navigate, NavLink, useNavigate, useParams, useSearchParams } from 'react-router';
 import { HataKutusu } from '../components/HataKutusu';
 import { Yukleniyor } from '../components/Yukleniyor';
@@ -48,6 +49,10 @@ export function ProjeAkisiSayfasi() {
   const navigate = useNavigate();
   const editor = useProjeEditoru(projeId);
   const sira = ADIMLAR.findIndex((a) => a.yol === adim);
+  // Çerezsiz kullanım ölçümü: hangi adıma ulaşıldığı (kişiye bağlanmaz).
+  useEffect(() => {
+    if (sira >= 0) olaySay(`adim:${adim}` as Olay);
+  }, [adim, sira]);
 
   if (sira < 0) return <Navigate to={`/proje/${projeId}/proje`} replace />;
   if (editor.hata) {

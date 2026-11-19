@@ -1,5 +1,6 @@
 /** Kök düzen: sorgu önbelleği, oturum ve korumalı yollar (oturum yoksa giriş/kayıt). */
 import '../lib/supabase';
+import { olaySay } from '@repiom/istemci/olcum';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -23,6 +24,8 @@ function Yollar() {
     </Stack>
   );
 }
+
+olaySay('uygulama_acilis');
 
 export default function KokDuzen() {
   const [istemci] = useState(

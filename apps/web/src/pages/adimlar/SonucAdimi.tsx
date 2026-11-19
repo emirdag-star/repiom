@@ -1,4 +1,5 @@
 import type { CalculationResult, ItemRow, ProjectInput, ResultRow } from '@repiom/core';
+import { olaySay } from '@repiom/istemci/olcum';
 import { useState } from 'react';
 import { HataKutusu } from '../../components/HataKutusu';
 import { useOnay } from '../../components/OnayPenceresi';
@@ -130,6 +131,7 @@ export function SonucAdimi({ editor, girdi, degistir, adimaGit }: AdimOzellikler
   };
   const indir = async (tur: 'excel' | 'pdf') => {
     setMesgul(tur);
+    olaySay(tur === 'excel' ? 'rapor:excel' : 'rapor:pdf');
     setIndirmeHatasi(null);
     try {
       await (tur === 'excel' ? excelIndir(s, girdi) : pdfIndir(s, girdi));

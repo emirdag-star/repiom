@@ -41,6 +41,7 @@ baglan(supabase, {
   url: SUPABASE_URL,
   anahtar: ANAHTAR,
   platform: {
+    ad: Platform.OS === 'ios' ? 'ios' : Platform.OS === 'android' ? 'android' : 'web',
     cihaz: () => `REPİO(M) mobil · ${Platform.OS} ${String(Platform.Version)}`,
     sha256: (metin) => Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, metin),
     kapanisDinle: (fn) => {

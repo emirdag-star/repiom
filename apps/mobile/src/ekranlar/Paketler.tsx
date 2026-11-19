@@ -13,7 +13,8 @@ import {
 import { tl } from '@repiom/istemci/bicim';
 import { turkceHata } from '@repiom/istemci/hatalar';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { olaySay } from '@repiom/istemci/olcum';
+import { useEffect, useMemo, useState } from 'react';
 import { Platform, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { BelgeBaglantisi } from '../bilesenler/Belge';
 import { Basari, Dugme, HataKutusu, Kart, Uyari, Yukleniyor } from '../bilesenler/temel';
@@ -23,6 +24,7 @@ import { useMagaza } from '../magaza';
 export function PaketlerEkrani() {
   const istemci = useQueryClient();
   const hak = useHak();
+  useEffect(() => olaySay('paketler_goruntuleme'), []);
   const liste = useQuery({ queryKey: ['paketler'], queryFn: paketler });
   const gecmis = useQuery({ queryKey: ['odemelerim'], queryFn: odemelerim });
   const [mesaj, setMesaj] = useState<string | null>(null);

@@ -1,3 +1,10 @@
 packages:
   - packages/*
   - apps/*
+minimumReleaseAgeExclude:
+  - expo-iap@6.5.1
+
+# Kurulum betikleri: esbuild'in betiği gerekmiyor (tsx ikili paketini kendi bulur).
+allowBuilds:
+  esbuild: false
+  '@parcel/watcher': false

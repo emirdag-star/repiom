@@ -3,6 +3,7 @@
 // Yalnız yerel geliştirme içindir; üretim anahtarları bu yolla yazılmaz.
 import { execSync } from 'node:child_process';
 import { copyFileSync, existsSync, writeFileSync } from 'node:fs';
+import { networkInterfaces } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -37,6 +38,22 @@ if (!url || !anahtar) {
 const hedef = join(kok, 'apps', 'web', '.env.local');
 writeFileSync(hedef, `VITE_SUPABASE_URL=${url}\nVITE_SUPABASE_PUBLISHABLE_KEY=${anahtar}\n`, 'utf8');
 console.log(`Yazıldı: apps/web/.env.local (${url})`);
+
+// Mobil uygulama: telefon bilgisayara yerel ağdan bağlanır (127.0.0.1 telefonda çalışmaz). `--yerel` ile 127.0.0.1.
+const lan = Object.values(networkInterfaces())
+  .flat()
+  .find((a) => a && a.family === 'IPv4' && !a.internal && !/^169\.254\./.test(a.address))?.address;
+const mobilUrl = process.argv.includes('--yerel') || !lan ? url : url.replace('127.0.0.1', lan);
+writeFileSync(
+  join(kok, 'apps', 'mobile', '.env.local'),
+  `EXPO_PUBLIC_SUPABASE_URL=${mobilUrl}
+EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${anahtar}
+# Yerelde sahte mağaza (gerçek App Store / Google Play yok)
+EXPO_PUBLIC_SAHTE_MAGAZA=1
+`,
+  'utf8',
+);
+console.log(`Yazıldı: apps/mobile/.env.local (${mobilUrl})`);
 
 // Sunucu fonksiyonlarının yerel ayarı (sahte iyzico). Varsa dokunulmaz (gerçek sandbox anahtarları yazılmış olabilir).
 const fonk = join(kok, 'supabase', 'functions', '.env');

@@ -31,6 +31,16 @@ export default tseslint.config(
     },
   },
   {
+    files: ['**/mobile/src/**/*.{ts,tsx}', '**/istemci/src/**/*.ts'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: reactHooks.configs.recommended.rules,
+  },
+  {
+    // Metro yapılandırması CommonJS olmak zorunda.
+    files: ['**/metro.config.js'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
+  {
     files: ['**/web/src/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
     rules: {

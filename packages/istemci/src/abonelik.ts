@@ -1,6 +1,6 @@
 /** Paketler, ödemeler, analiz hakları ve hesap işlemleri. Kurallar sunucuda; burada yalnız çağrılar var. */
 import { useQuery } from '@tanstack/react-query';
-import { ayar, db } from './baglanti';
+import { ayar, db, fonksiyonHatasi } from './baglanti';
 
 async function rpc<T>(ad: string, arg: Record<string, unknown> = {}): Promise<T> {
   const { data, error } = await db().rpc(ad, arg);
@@ -159,3 +159,38 @@ export const sha256 = (metin: string): Promise<string> => ayar().platform.sha256
 
 export const tarihGunSaat = (t: string | null | undefined) =>
   t ? new Date(t).toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+
+export const YONTEM_ADI: Record<string, string> = {
+  kart: 'Kart',
+  havale: 'Havale/EFT',
+  iap: 'Mağaza (App Store / Google Play)',
+  yonetici: 'Yönetici',
+};
+
+/* ---------- Mobil: uygulama içi satın alma ---------- */
+export interface MagazaIslemi {
+  platform: 'ios' | 'android';
+  /** Mağaza ürün kimliği = paket kimliği. */
+  urun: string;
+  /** iOS: transactionId */
+  islem?: string;
+  /** Android: purchaseToken */
+  jeton?: string;
+}
+
+/** Satın almayı sunucuda mağazadan doğrular ve hakkı tanımlatır. Aynı işlem tekrar gönderilirse yeniden hak vermez. */
+export async function magazaDogrula(m: MagazaIslemi): Promise<{ yeni: boolean }> {
+  const { data, error } = await db().functions.invoke('magaza-dogrula', { body: m });
+  if (error) throw await fonksiyonHatasi(error, 'Satın alma doğrulanamadı. Lütfen tekrar dene.');
+  return data as { yeni: boolean };
+}
+
+/** YALNIZ YEREL/TEST: sahte mağazada satın alma oluşturur (gerçek mağaza bağlı değilken). */
+export async function sahteMagazaSatinAl(platform: 'ios' | 'android', urun: string): Promise<MagazaIslemi> {
+  const { data, error } = await db().functions.invoke('test-magaza/sahte/satin-al', {
+    body: { platform, urun },
+  });
+  if (error) throw await fonksiyonHatasi(error, 'Sahte mağaza kullanılamıyor.');
+  const d = data as { islem?: string; jeton?: string };
+  return { platform, urun, ...d };
+}

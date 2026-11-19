@@ -60,6 +60,8 @@ jobs:
         run: pnpm --filter @repiom/web exec playwright install --with-deps chromium
       - name: Uçtan uca testler (masaüstü ve telefon)
         run: pnpm e2e
+      - name: Mobil uygulama uçtan uca testleri (react-native-web, sahte mağaza)
+        run: pnpm e2e:mobil
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

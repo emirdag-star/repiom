@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "REPİO(M)",
+    "slug": "repiom",
+    "scheme": "repiom",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": { "image": "./assets/splash-icon.png", "resizeMode": "contain", "backgroundColor": "#ffffff" },
+    "ios": {
+      "bundleIdentifier": "com.repiom.uygulama",
+      "supportsTablet": true,
+      "config": { "usesNonExemptEncryption": false }
+    },
+    "android": {
+      "package": "com.repiom.uygulama",
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": { "favicon": "./assets/favicon.png", "output": "single" },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-iap",
+      [
+        "expo-build-properties",
+        { "ios": { "deploymentTarget": "16.4" }, "android": { "compileSdkVersion": 36, "minSdkVersion": 24 } }
+      ]
+    ],
+    "experiments": { "typedRoutes": false }
+  }
+}

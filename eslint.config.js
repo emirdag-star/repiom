@@ -14,6 +14,8 @@ export default tseslint.config(
       '**/generated/**',
       '**/reference/**',
       '**/supabase/functions/**',
+      // Deno ile çalışan resmi Supabase yönlendiricisi (kaynağıyla birebir)
+      'sunucu/fonksiyonlar/**',
     ],
   },
   js.configs.recommended,

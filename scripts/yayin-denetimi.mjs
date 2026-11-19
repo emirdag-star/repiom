@@ -13,7 +13,12 @@ const kontrol = (tamam, baslik, aciklama, engelleyici = true) =>
 const oku = (y) => readFileSync(join(kok, y), 'utf8');
 
 /* 1. Depoda gizli bilgi yok */
-const izlenen = execFileSync('git', ['ls-files'], { cwd: kok, encoding: 'utf8' }).split('\n').filter(Boolean);
+let izlenen = [];
+try {
+  izlenen = execFileSync('git', ['ls-files'], { cwd: kok, encoding: 'utf8' }).split('\n').filter(Boolean);
+} catch {
+  console.log('• git bulunamadı: depo içeriği denetimi atlandı (sunucuda çalışırken olağan).');
+}
 const yasakDosya = izlenen.filter((f) =>
   /(^|\/)\.env(\.|$)(?!example)|anahtarlar\.json$|kurulum\.ps1$|\.dxf$|\.pkl$|\.rpyd$/i.test(f),
 );
@@ -43,44 +48,43 @@ kontrol(
   `${avukat} taslak işareti var`,
 );
 
-/* 3. Sunucu fonksiyonları: test fonksiyonları yayınlanmaz */
+/* 3. Sunucu fonksiyonları: test fonksiyonları dışarıdan çağrılamaz */
 const fonksiyonlar = readdirSync(join(kok, 'supabase/functions'), { withFileTypes: true })
   .filter((d) => d.isDirectory() && !d.name.startsWith('_'))
   .map((d) => d.name);
-const testler = fonksiyonlar.filter((f) => f.startsWith('test-'));
+const caddy = readFileSync(join(kok, 'sunucu/yonlendirici/Caddyfile'), 'utf8');
 kontrol(
-  true,
-  'Yayınlanacak fonksiyonlar',
-  fonksiyonlar.filter((f) => !f.startsWith('test-')).join(', ') + ` (yayınlanmayacak: ${testler.join(', ')})`,
-  false,
+  /path_regexp \^\/functions\/v1\/\(test-\|_\|main/.test(caddy),
+  'Test fonksiyonları (test-*) yönlendiricide kapalı',
+  fonksiyonlar.filter((f) => f.startsWith('test-')).join(', '),
 );
 
-/* 4. Üretim ortam değişkenleri */
+/* 4. Sunucu ortam dosyası (sunucu/.env — yalnız sunucuda; şablon: sunucu/.env.example) */
 const i = process.argv.indexOf('--ortam');
 const ZORUNLU = {
-  web: ['VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY', 'VITE_SENTRY_DSN'],
-  mobil: [
-    'EXPO_PUBLIC_SUPABASE_URL',
-    'EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
-    'EXPO_PUBLIC_SENTRY_DSN',
-    'EXPO_PUBLIC_WEB_URL',
+  adres: ['SITE_ADRESI', 'SITE_URL', 'ACME_EPOSTA'],
+  gizli: [
+    'POSTGRES_PASSWORD',
+    'JWT_SECRET',
+    'ANON_KEY',
+    'SERVICE_ROLE_KEY',
+    'PG_META_CRYPTO_KEY',
+    'MAGAZA_BILDIRIM_ANAHTARI',
   ],
-  fonksiyon: [
+  eposta: ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_GONDEREN'],
+  yedek: ['YEDEK_SIFRESI', 'YEDEK_R2_UC', 'YEDEK_R2_KOVA', 'YEDEK_R2_ANAHTAR', 'YEDEK_R2_GIZLI'],
+  hizmetler: [
     'IYZICO_URL',
     'IYZICO_API_KEY',
     'IYZICO_SECRET_KEY',
-    'ODEME_DONUS_URL',
-    'IZINLI_KAYNAKLAR',
     'ANTHROPIC_API_KEY',
     'YZ_MODEL',
     'APPLE_ISSUER_ID',
     'APPLE_KEY_ID',
     'APPLE_PRIVATE_KEY',
-    'APPLE_BUNDLE_ID',
-    'GOOGLE_PACKAGE_NAME',
     'GOOGLE_SERVICE_ACCOUNT',
-    'MAGAZA_BILDIRIM_ANAHTARI',
     'SENTRY_DSN',
+    'WEB_SENTRY_DSN',
   ],
 };
 if (i > 0) {
@@ -90,29 +94,47 @@ if (i > 0) {
       .split(/\r?\n/)
       .map((s) => /^([A-Z0-9_]+)=(.*)$/.exec(s.trim()))
       .filter(Boolean)
-      .map((m) => [m[1], m[2]]),
+      .map((m) => [m[1], m[2].replace(/\s+#.*$/, '').trim()]),
   );
   for (const [grup, adlar] of Object.entries(ZORUNLU)) {
-    const eksik = adlar.filter((a) => !d[a]);
+    const eksik = adlar.filter((a) => !d[a] || d[a].includes('<'));
     kontrol(
       !eksik.length,
-      `Üretim değişkenleri (${grup})`,
+      `Sunucu ayarları (${grup})`,
       eksik.length ? `eksik: ${eksik.join(', ')}` : 'tamam',
     );
   }
-  const sahte = Object.keys(d).filter(
-    (a) => /^SAHTE_|SAHTE_MAGAZA|_BASE_URL$/.test(a) || /test-(iyzico|claude|magaza)|sahte/i.test(d[a]),
+  kontrol(d.YEDEK_ACIK === '1', 'Sürekli yedek açık (YEDEK_ACIK=1)', d.YEDEK_ACIK ?? 'tanımsız');
+  kontrol(
+    !d.YEDEK_DEPO_TURU || d.YEDEK_DEPO_TURU === 's3',
+    'Yedek deposu sunucu DIŞINDA (R2)',
+    d.YEDEK_DEPO_TURU ?? 's3',
   );
-  kontrol(!sahte.length, 'Üretimde sahte servis ayarı yok', sahte.join(', ') || 'temiz');
+  kontrol(
+    (d.YEDEK_SIFRESI ?? '').length >= 32,
+    'Yedek şifresi en az 32 karakter',
+    'anahtar-uret.mjs ile üret',
+  );
+  kontrol(d.EPOSTA_DOGRULAMASIZ !== 'true', 'E-posta doğrulaması açık', d.EPOSTA_DOGRULAMASIZ ?? 'açık');
+  kontrol(
+    !d.YEREL_DENEME || d.YEREL_DENEME === '0',
+    'Yerel deneme ayarı kapalı (HSTS ve HTTPS zorlaması açık)',
+    d.YEREL_DENEME ?? '0',
+  );
+  const sahte = Object.keys(d).filter(
+    (a) => /^SAHTE_/.test(a) || /test-(iyzico|claude|magaza)|sahte/i.test(d[a]),
+  );
+  kontrol(!sahte.length, 'Sahte servis ayarı yok', sahte.join(', ') || 'temiz');
   kontrol(
     !/localhost|127\.0\.0\.1/.test(metin),
-    'Üretim adreslerinde localhost yok',
+    'Adreslerde localhost yok',
     /localhost|127\.0\.0\.1/.test(metin) ? 'localhost geçiyor' : 'temiz',
   );
+  kontrol((d.SITE_URL ?? '').startsWith('https://'), 'Site adresi HTTPS', d.SITE_URL ?? 'tanımsız');
   kontrol(
     (d.MAGAZA_BILDIRIM_ANAHTARI ?? '').length >= 32,
     'Mağaza bildirim anahtarı en az 32 karakter',
-    'rastgele üret',
+    'anahtar-uret.mjs ile üret',
   );
   kontrol(
     d.YZ_MODEL === 'claude-sonnet-5-5',
@@ -120,7 +142,11 @@ if (i > 0) {
     d.YZ_MODEL ?? 'tanımsız',
   );
 } else {
-  kontrol(false, 'Üretim ortam dosyası denetlenmedi', '--ortam <dosya> ile çalıştır (dosya depoda tutulmaz)');
+  kontrol(
+    false,
+    'Sunucu ortam dosyası denetlenmedi',
+    '--ortam <sunucu/.env kopyası> ile çalıştır (dosya depoda tutulmaz)',
+  );
 }
 
 /* 5. Mobil yapılandırma */

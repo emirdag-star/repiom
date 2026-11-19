@@ -4,3 +4,5 @@ supabase/migrations/
 **/dist/
 **/coverage/
 packages/core/src/generated/
+# Supabase'in resmi yönlendiricisi: kaynağıyla birebir kalsın
+sunucu/fonksiyonlar/

@@ -120,3 +120,14 @@ Her satır: karar — gerekçe. Ürün kararları burada değil; onlar ürün sa
 - Yayın öncesi zorunlu bulunan eksik: "Şifremi unuttum" akışı yoktu. Eklendi (web: istek ve yeni şifre sayfaları; mobil: istek, yeni şifre web sayfasında). Hesap varlığı sızdırılmaz (her e-postaya aynı yanıt). Türkçe e-posta şablonları (doğrulama, sıfırlama, e-posta değişikliği).
 - Yayın betiği varsayılan kuru çalışır, `--uygula` ile uygular; yalnız temiz main dalından, denetim ve testler geçtikten sonra; test-* fonksiyonları yayınlanmaz; gizli değerler geçici dosyayla yüklenip hemen silinir.
 - Yayın denetimi engelleyicileri: depoda gizli dosya/anahtar kalıbı, şirket bilgisi yer tutucuları, taslak hukuki metin, eksik üretim değişkeni, üretimde sahte servis ayarı, localhost adresi, kısa bildirim anahtarı.
+
+## Faz 9 — ek: kendi sunucumuz (ürün sahibi, 20.11.2026)
+
+- Supabase Cloud ve Cloudflare Pages yerine Türkiye'deki kendi sunucumuz: `sunucu/compose.yaml` (Supabase'in resmi kendi-sunucu kurulumundan sadeleştirildi; realtime, depolama, günlük toplama, havuz yok). Sürümler yerel testlerdeki Supabase sürümleriyle aynı.
+- Tek giriş noktası Caddy: web + `/auth/v1`, `/rest/v1`, `/functions/v1` yönlendirmesi + otomatik HTTPS. Kong/Envoy yok (yayımlanabilir anahtar JWT olduğu için PostgREST ve GoTrue doğrudan doğrular). Güvenlik başlıkları tek kaynaktan (`apps/web/public/_headers`) Caddy'ye çevrilir. `test-*` fonksiyonları yönlendiricide kapalı.
+- Yedek: sürekli WAL arşivi (en geç 60 sn) + gece fark / pazar tam yedek, son 2 tam yedek (≈ 2 hafta dakikaya dönüş). Araç pgBackRest (Alpine resmi paketi; WAL-G ikili dosyası doğrulanamadığı için seçilmedi). Şifreleme sunucuda AES-256; sunucu dışı kopya Cloudflare R2 (AB) — yurt dışına aktarım olarak avukata bildirilecek.
+- Supabase imajında `postgres` tam yetkili değil; yedek işlemleri konteyner içi soketten `supabase_admin` ile.
+- Migration'lar `goc` servisiyle (Supabase CLI ile aynı `supabase_migrations.schema_migrations` tablosu); her başlatmada eksikler uygulanır. Üretimin ilk verisi yalnız ilk fiyat listesi; yönetici e-postası elle.
+- Studio yalnız `--profile yonetim` ile ve yalnız 127.0.0.1'de (SSH tüneli).
+- Kod GitHub olmadan SSH ile sunucudaki çıplak depoya gönderilir; yayın betiği varsayılan kuru çalışır, sunucuda denetim + anlık yedek + `compose up --build`.
+- Yerelde doğrulandı: yığın ayağa kalktı; kayıt → Türkçe doğrulama e-postası → giriş → örnek proje → sonuç; test fonksiyonu dışarıdan 404; güvenlik başlıkları; arşiv ve ilk tam yedek; dakikaya geri dönüş (silinen kayıt geri geldi, sonraki kayıt geri alındı).

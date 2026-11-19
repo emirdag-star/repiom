@@ -24,20 +24,20 @@ Yerelde e-posta doğrulaması kapalıdır; kayıt olunca doğrudan giriş yapıl
 
 ## Testler
 
-| Komut                                            | Ne yapar                                                                       |
-| ------------------------------------------------ | ------------------------------------------------------------------------------ |
-| `pnpm lint`                                      | Kod denetimi                                                                   |
-| `pnpm typecheck`                                 | Tip kontrolü                                                                   |
-| `pnpm test`                                      | Birim testleri (Vitest)                                                        |
-| `pnpm db:test`                                   | Veritabanı ve RLS testleri (pgTAP); Supabase açık olmalı                       |
-| `pnpm e2e`                                       | Uçtan uca testler, masaüstü ve telefon (Playwright)                            |
-| `pnpm dxf:karsilastir <mimari.dxf> [statik.dxf]` | Gerçek çizimi prototip ve yeni kodla analiz edip farkları yazar (yalnız yerel) |
-| `pnpm e2e:mobil`                                 | Mobil uygulamanın uçtan uca testleri (web derlemesinde, telefon görünümü)      |
-| `pnpm yedek` / `pnpm yedek:geri-yukle <dosya>`   | Şifreli yedek al / yerel veritabanına geri yükle (`YEDEK_SIFRESI` gerekir)     |
-| `pnpm yayin:denetim --ortam <dosya>`             | Yayın öncesi eksikleri listeler                                                |
-| `pnpm yayinla --ortam <dosya> [--uygula]`        | Üretime yayın (varsayılan kuru çalışır) — `docs/yayin.md`                      |
-| `pnpm gen:check`                                 | Formül dosyası `veri.js` ile güncel mi                                         |
-| `pnpm build`                                     | Üretim derlemesi                                                               |
+| Komut                                              | Ne yapar                                                                       |
+| -------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `pnpm lint`                                        | Kod denetimi                                                                   |
+| `pnpm typecheck`                                   | Tip kontrolü                                                                   |
+| `pnpm test`                                        | Birim testleri (Vitest)                                                        |
+| `pnpm db:test`                                     | Veritabanı ve RLS testleri (pgTAP); Supabase açık olmalı                       |
+| `pnpm e2e`                                         | Uçtan uca testler, masaüstü ve telefon (Playwright)                            |
+| `pnpm dxf:karsilastir <mimari.dxf> [statik.dxf]`   | Gerçek çizimi prototip ve yeni kodla analiz edip farkları yazar (yalnız yerel) |
+| `pnpm e2e:mobil`                                   | Mobil uygulamanın uçtan uca testleri (web derlemesinde, telefon görünümü)      |
+| `pnpm yedek` / `pnpm yedek:geri-yukle <dosya>`     | Ek mantıksal döküm (şifreli). Asıl yedek sunucuda sürekli: `docs/yayin.md`     |
+| `pnpm yayin:denetim --ortam <dosya>`               | Yayın öncesi eksikleri listeler                                                |
+| `pnpm yayinla --ssh <kullanici@sunucu> [--uygula]` | Kendi sunucumuza yayın (varsayılan kuru çalışır) — `docs/yayin.md`             |
+| `pnpm gen:check`                                   | Formül dosyası `veri.js` ile güncel mi                                         |
+| `pnpm build`                                       | Üretim derlemesi                                                               |
 
 Excel raporunun LibreOffice ile yeniden hesap testi için bir kez `docker build -t repiom-libreoffice tools/libreoffice` çalıştır (ya da LibreOffice'i kur); imaj yoksa bu test yerelde atlanır, CI'da her zaman çalışır.
 
@@ -51,6 +51,7 @@ Excel raporunun LibreOffice ile yeniden hesap testi için bir kez `docker build 
 - `apps/web` — React + Vite web uygulaması.
 - `apps/mobile` — Expo (React Native) mobil uygulama.
 - `supabase/` — migration'lar, seed verisi, pgTAP testleri.
+- `sunucu/` — kendi sunucumuz için Docker Compose kurulumu (web, API, veritabanı, sürekli yedek).
 - `docs/kararlar.md` — teknik kararlar ve gerekçeleri.
 
 ## Güvenlik

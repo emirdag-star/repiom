@@ -1,6 +1,7 @@
 /** Giriş, kayıt ve güncellenen metinlerin yeniden onayı (web ile aynı kurallar; onaylar sunucuda kaydedilir). */
 import { BELGELER } from '@repiom/core';
-import { girisSemasi, kayitSemasi } from '@repiom/istemci/formlar';
+import { girisSemasi, kayitSemasi, sifremiUnuttumSemasi } from '@repiom/istemci/formlar';
+import { sifreSifirlamaIste } from '@repiom/istemci/sifre';
 import { turkceHata } from '@repiom/istemci/hatalar';
 import { eksikOnaylar, onayKaydet } from '@repiom/istemci/onaylar';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -9,7 +10,7 @@ import { useState, type ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { BelgeBaglantisi } from '../bilesenler/Belge';
 import { MetinAlani, OnayKutusu } from '../bilesenler/form';
-import { Dugme, HataKutusu, Kart, Logo } from '../bilesenler/temel';
+import { Basari, Dugme, HataKutusu, Kart, Logo } from '../bilesenler/temel';
 import { R, S } from '../bilesenler/tema';
 import { useOturum } from '../lib/oturum';
 import { supabase, supabaseAyarHatasi } from '../lib/supabase';
@@ -53,6 +54,28 @@ export function GirisEkrani() {
   const [hatalar, setHatalar] = useState<Record<string, string>>({});
   const [sunucu, setSunucu] = useState<string | null>(null);
   const [mesgul, setMesgul] = useState(false);
+  const [unuttum, setUnuttum] = useState(false);
+  const [bilgi, setBilgi] = useState<string | null>(null);
+
+  // Şifremi unuttum: bağlantı e-postayla gelir, yeni şifre web sayfasında belirlenir.
+  const sifirla = async () => {
+    setSunucu(null);
+    const r = sifremiUnuttumSemasi.safeParse({ eposta });
+    setHatalar(ilkHata(r));
+    if (!r.success) return;
+    setMesgul(true);
+    try {
+      await sifreSifirlamaIste(r.data.eposta, `${process.env.EXPO_PUBLIC_WEB_URL ?? ''}/sifre-yenile`);
+      setBilgi(
+        `Bu adresle kayıtlı bir hesap varsa ${r.data.eposta} adresine şifre sıfırlama bağlantısı gönderdik. Bağlantı 1 saat geçerlidir.`,
+      );
+      setUnuttum(false);
+    } catch (e) {
+      setSunucu(turkceHata(e));
+    } finally {
+      setMesgul(false);
+    }
+  };
 
   const gonder = async () => {
     setSunucu(null);
@@ -76,7 +99,7 @@ export function GirisEkrani() {
 
   return (
     <Cerceve>
-      <Kart baslik="Giriş yap">
+      <Kart baslik={unuttum ? 'Şifremi unuttum' : 'Giriş yap'}>
         <HataKutusu mesaj={supabaseAyarHatasi ?? sunucu} />
         <MetinAlani
           etiket="E-posta"
@@ -86,13 +109,33 @@ export function GirisEkrani() {
           otomatik="email"
         />
         <Hata m={hatalar.eposta} />
-        <MetinAlani etiket="Şifre" deger={sifre} degistir={setSifre} gizli otomatik="password" />
-        <Hata m={hatalar.sifre} />
+        {bilgi ? <Basari>{bilgi}</Basari> : null}
+        {unuttum ? (
+          <Dugme
+            tur="birincil"
+            metin={mesgul ? 'Gönderiliyor…' : 'Sıfırlama bağlantısı gönder'}
+            devreDisi={mesgul}
+            bas={() => void sifirla()}
+          />
+        ) : (
+          <>
+            <MetinAlani etiket="Şifre" deger={sifre} degistir={setSifre} gizli otomatik="password" />
+            <Hata m={hatalar.sifre} />
+            <Dugme
+              tur="birincil"
+              metin={mesgul ? 'Giriş yapılıyor…' : 'Giriş yap'}
+              devreDisi={mesgul}
+              bas={() => void gonder()}
+            />
+          </>
+        )}
         <Dugme
-          tur="birincil"
-          metin={mesgul ? 'Giriş yapılıyor…' : 'Giriş yap'}
-          devreDisi={mesgul}
-          bas={() => void gonder()}
+          tur="baglanti"
+          metin={unuttum ? 'Giriş yapmaya dön' : 'Şifremi unuttum'}
+          bas={() => {
+            setUnuttum(!unuttum);
+            setBilgi(null);
+          }}
         />
         <View style={S.satir}>
           <Text style={S.metin}>Hesabın yok mu?</Text>

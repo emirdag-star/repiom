@@ -60,6 +60,9 @@ export function GirisSayfasi() {
         </button>
       </form>
       <p className="form-alti">
+        <Link to="/sifremi-unuttum">Şifremi unuttum</Link>
+      </p>
+      <p className="form-alti">
         Hesabın yok mu? <Link to="/kayit">Kayıt ol</Link>
       </p>
     </section>

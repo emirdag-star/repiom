@@ -16,6 +16,8 @@ const AUTH_KODLARI: Record<string, string> = {
   session_not_found: 'Oturumun sona ermiş. Lütfen tekrar giriş yap.',
   refresh_token_not_found: 'Oturumun sona ermiş. Lütfen tekrar giriş yap.',
   user_not_found: 'Bu e-posta adresiyle kayıtlı hesap bulunamadı.',
+  same_password: 'Yeni şifre eskisiyle aynı olamaz.',
+  otp_expired: 'Şifre sıfırlama bağlantısının süresi dolmuş. Yeniden iste.',
 };
 
 /** Postgres hata kodları (RLS ve sunucu fonksiyonlarından). */

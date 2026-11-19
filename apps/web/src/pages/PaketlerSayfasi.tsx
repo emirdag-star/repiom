@@ -16,6 +16,7 @@ import {
   havaleBildir,
   kartlaOde,
   ODEME_DURUMU,
+  YONTEM_ADI,
   odemeIptal,
   odemelerim,
   paketler,
@@ -200,9 +201,7 @@ export function PaketlerSayfasi() {
                         {o.adet > 1 ? ` × ${o.adet}` : ''}
                       </td>
                       <td className="s">{tl(o.tutar)}</td>
-                      <td>
-                        {o.yontem === 'kart' ? 'Kart' : o.yontem === 'havale' ? 'Havale/EFT' : o.yontem}
-                      </td>
+                      <td>{YONTEM_ADI[o.yontem] ?? o.yontem}</td>
                       <td>{o.referans}</td>
                       <td>
                         {ODEME_DURUMU[o.durum]}
@@ -268,7 +267,7 @@ function SatinAl({
         setHavale({ referans: r.referans, tutar: Number(r.tutar) });
         await bitti('Havale/EFT bildirimin alındı. Ödemen onaylanınca hakların tanımlanacak.');
       } else {
-        window.location.assign(await kartlaOde(paket.id, adet, f));
+        window.location.assign(await kartlaOde(paket.id, adet, f, window.location.origin + '/paketler'));
       }
     } catch (e) {
       setHata(turkceHata(e));

@@ -22,7 +22,9 @@
     "e2e": "pnpm --filter @repiom/web e2e",
     "gen:formulas": "pnpm --filter @repiom/core gen:formulas",
     "gen:check": "pnpm --filter @repiom/core gen:check",
-    "dxf:karsilastir": "pnpm --filter @repiom/core dxf:karsilastir"
+    "dxf:karsilastir": "pnpm --filter @repiom/core dxf:karsilastir",
+    "e2e:mobil": "pnpm --filter @repiom/mobile e2e",
+    "mobil": "pnpm --filter @repiom/mobile start"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

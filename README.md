@@ -32,6 +32,7 @@ Yerelde e-posta doğrulaması kapalıdır; kayıt olunca doğrudan giriş yapıl
 | `pnpm db:test`                                   | Veritabanı ve RLS testleri (pgTAP); Supabase açık olmalı                       |
 | `pnpm e2e`                                       | Uçtan uca testler, masaüstü ve telefon (Playwright)                            |
 | `pnpm dxf:karsilastir <mimari.dxf> [statik.dxf]` | Gerçek çizimi prototip ve yeni kodla analiz edip farkları yazar (yalnız yerel) |
+| `pnpm e2e:mobil`                                 | Mobil uygulamanın uçtan uca testleri (web derlemesinde, telefon görünümü)      |
 | `pnpm gen:check`                                 | Formül dosyası `veri.js` ile güncel mi                                         |
 | `pnpm build`                                     | Üretim derlemesi                                                               |
 
@@ -43,7 +44,9 @@ Excel raporunun LibreOffice ile yeniden hesap testi için bir kez `docker build 
 
 - `packages/core` — hesap motoru, veri modeli, DXF analizi (saf TypeScript). `reference/` prototipten alınmış doğruluk referansıdır.
 - `packages/report` — Excel ve PDF raporları.
+- `packages/istemci` — web ve mobilin ortak sunucu çağrıları ve iş mantığı.
 - `apps/web` — React + Vite web uygulaması.
+- `apps/mobile` — Expo (React Native) mobil uygulama.
 - `supabase/` — migration'lar, seed verisi, pgTAP testleri.
 - `docs/kararlar.md` — teknik kararlar ve gerekçeleri.
 
@@ -57,3 +60,11 @@ Gizli anahtarlar yalnız ortam değişkenlerinde tutulur ve depoya girmez. Sunuc
 2. `docker restart supabase_edge_runtime_repiom` ile fonksiyonları yeniden başlat.
 3. Kendi çiziminle "Çizim yükle" → "Yapay zekâ kontrolü de yapılsın" kutusunu işaretle → analizi başlat. Kullanım Yönetici sayfasında görünür.
 4. Bitince dosyayı `.env.example`'daki sahte değerlere geri döndür. Gerçek proje çizimleri (`*.dxf`) üçüncü kişilere aittir; depoya eklenmez.
+
+## Mobil uygulamayı telefonda denemek
+
+1. Telefon ve bilgisayar aynı Wi-Fi ağında olsun. Telefona **Expo Go** uygulamasını kur (App Store / Google Play).
+2. `pnpm db:start` ve `pnpm env:yerel` (mobil ayarı bilgisayarın yerel ağ adresiyle yazılır).
+3. `pnpm mobil` → ekrandaki QR kodu telefonla okut.
+4. Expo Go'da satın almalar **sahte mağazada** yapılır (gerçek ücret alınmaz). Gerçek App Store / Google Play satın alması için geliştirme derlemesi (EAS) ve mağaza hesapları gerekir.
+5. Windows güvenlik duvarı sorarsa yerel ağ erişimine izin ver (55321 ve 8081 bağlantı noktaları).

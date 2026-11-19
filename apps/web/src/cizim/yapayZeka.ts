@@ -5,7 +5,7 @@
  * Sunucu: supabase/functions/dxf-yz (rıza ve analiz başına tek çağrı orada denetlenir).
  */
 import { dxf } from '@repiom/core';
-import { supabase } from '../lib/supabase';
+import { fiyatlariUygula, yzIste, type YzFiyat } from '@repiom/istemci/cizim';
 import type { EkKalem } from './KontrolEkrani';
 import type { AnalizSonucu } from './mesajlar';
 
@@ -15,11 +15,7 @@ export interface YzDurumu {
   mesaj?: string;
 }
 
-export interface YzFiyat {
-  ad: string;
-  fiyat: number;
-  gerekce: string;
-}
+export type { YzFiyat };
 
 type Onizle = (
   bolge: [number, number, number, number],
@@ -52,40 +48,7 @@ export async function yzKontrol(
   ekler: EkKalem[],
   onizle: Onizle,
 ): Promise<{ notlar: string[]; fiyatlar: YzFiyat[] }> {
-  if (!supabase) throw new Error('Sunucu bağlantı ayarı eksik.');
-  const yeni = new Map<string, dxf.AiNewItem>();
-  ekler.forEach((e) => {
-    const v = yeni.get(e.ad);
-    yeni.set(e.ad, { ad: e.ad, birim: e.birim ?? '', metraj: (v?.metraj ?? 0) + e.metraj });
-  });
-  const { data, error } = await supabase.functions.invoke('dxf-yz', {
-    body: {
-      analiz_id: analizId,
-      il,
-      gorseller: await yazisizGorseller(a, onizle),
-      ozet: dxf.aiSummary(a.mimari, a.statik),
-      yeni_kalemler: [...yeni.values()],
-    },
-  });
-  if (error) {
-    const ctx = (error as { context?: Response }).context;
-    const govde = ctx ? await ctx.json().catch(() => null) : null;
-    throw new Error(govde?.message ?? 'Yapay zekâ servisine ulaşılamadı.');
-  }
-  const d = data as { notlar?: string[]; fiyatlar?: YzFiyat[] };
-  return { notlar: d.notlar ?? [], fiyatlar: d.fiyatlar ?? [] };
+  return yzIste(analizId, a, il, ekler, await yazisizGorseller(a, onizle));
 }
 
-/** Yapay zekâ fiyatlarını, kullanıcının henüz değiştirmediği (varsayılan tahminli) kalemlere uygular. */
-export function fiyatlariUygula(ekler: EkKalem[], varsayilan: EkKalem[], fiyatlar: YzFiyat[]): EkKalem[] {
-  const f = new Map(fiyatlar.map((x) => [x.ad, x]));
-  return ekler.map((e, i) => {
-    const y = f.get(e.ad);
-    if (!y || e.fiyat !== varsayilan[i]?.fiyat) return e;
-    return {
-      ...e,
-      fiyat: y.fiyat,
-      aciklama: [e.aciklama, `Yapay zekâ tahmini: ${y.gerekce}`].filter(Boolean).join(' · '),
-    };
-  });
-}
+export { fiyatlariUygula };

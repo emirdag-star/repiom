@@ -1,0 +1,21 @@
+# Docker derleme bağlamına GİRMEZ: gizli bilgiler, çizimler, yedekler, bağımlılıklar ve çıktılar.
+**/node_modules
+**/dist
+**/.expo
+**/test-results
+**/playwright-report
+.git
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+supabase/anahtarlar.json
+supabase/kurulum.ps1
+supabase/.temp
+sunucu/.env
+yedekler
+**/*.dxf
+**/*.DXF
+**/*.pkl
+**/*.rpyd

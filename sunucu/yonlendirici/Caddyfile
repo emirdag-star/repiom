@@ -1,0 +1,54 @@
+# REPİO(M) tek giriş noktası: web uygulaması + API yönlendirmesi + otomatik HTTPS (Let's Encrypt).
+{
+	email {$ACME_EPOSTA}
+	admin off
+}
+
+(api) {
+	# Supabase istemcisi bu yolları kullanır (supabase-js). Yol öneki atılıp ilgili servise iletilir.
+	handle_path /auth/v1/* {
+		reverse_proxy auth:9999
+	}
+	handle_path /rest/v1/* {
+		reverse_proxy rest:3000
+	}
+	# Test fonksiyonları (test-*) ve ortak klasör dışarıdan çağrılamaz (ayrıca ortam değişkeniyle de kapalıdır).
+	@yasak path_regexp ^/functions/v1/(test-|_|main(/|$))
+	handle @yasak {
+		respond 404
+	}
+	handle_path /functions/v1/* {
+		reverse_proxy functions:9000 {
+			transport http {
+				read_timeout 160s
+			}
+		}
+	}
+}
+
+# İç ağ geçidi: yalnız konteyner ağından erişilir (sunucu fonksiyonları ve e-posta şablonları için), TLS yok.
+:8000 {
+	import api
+	handle_path /eposta/* {
+		root * /srv/eposta
+		file_server
+	}
+}
+
+# Dış adres: üretimde alan adı (ör. repiom.com.tr → HTTPS otomatik), yerel denemede http://localhost:8080.
+{$SITE_ADRESI} {
+	encode zstd gzip
+	import api
+	handle {
+		root * /srv/web
+		import /etc/caddy/basliklar.caddy
+		@html path / /index.html
+		header @html Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
+	log {
+		output stdout
+		format console
+	}
+}

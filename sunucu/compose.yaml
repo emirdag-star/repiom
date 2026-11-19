@@ -1,0 +1,298 @@
+# REPİO(M) — kendi sunucumuzda (Türkiye) tam kurulum.
+# Servisler: db (Postgres + sürekli yedek), yedekci (gece yedekleri), auth (GoTrue), rest (PostgREST),
+# functions (sunucu fonksiyonları), goc (migration, tek seferlik), yonlendirici (Caddy: web + API + otomatik HTTPS).
+# Yönetim paneli (Studio) yalnız istendiğinde: `docker compose --profile yonetim up -d` → yalnız 127.0.0.1:3000
+# (sunucuya SSH tüneliyle erişilir; internete açılmaz).
+# Supabase'in resmi kendi-sunucu kurulumundan (docker/, Apache-2.0) sadeleştirildi: realtime, depolama, günlük toplama
+# ve havuz (pooler) kullanılmadığı için yok. Sürümler, testlerin çalıştığı yerel Supabase sürümleriyle aynı.
+# Ayarlar: sunucu/.env (şablon: .env.example, `node anahtar-uret.mjs` ile üretilir). .env depoya GİRMEZ.
+name: repiom
+
+x-db-ortak: &db-ortak
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD gerekli}
+  PGPASSWORD: ${POSTGRES_PASSWORD}
+  POSTGRES_DB: postgres
+  PGDATABASE: postgres
+  POSTGRES_HOST: /var/run/postgresql
+  JWT_EXP: ${JWT_EXPIRY:-3600}
+  TZ: Europe/Istanbul
+  # Sürekli yedek (pgBackRest): Cloudflare R2 (S3 uyumlu), istemci tarafında AES-256 ile şifreli.
+  YEDEK_ACIK: ${YEDEK_ACIK:-0}
+  ARSIV_SURESI: ${ARSIV_SURESI:-60}
+  PGBACKREST_STANZA: repiom
+  PGBACKREST_PG1_PATH: /var/lib/postgresql/data
+  PGBACKREST_PG1_SOCKET_PATH: /var/run/postgresql
+  # Supabase imajında tam yetkili kullanıcı supabase_admin (yalnız konteyner içi soketten, parolasız).
+  PGBACKREST_PG1_USER: supabase_admin
+  PGBACKREST_REPO1_TYPE: ${YEDEK_DEPO_TURU:-s3}
+  PGBACKREST_REPO1_PATH: ${YEDEK_DEPO_YOLU:-/repiom}
+  PGBACKREST_REPO1_S3_ENDPOINT: ${YEDEK_R2_UC:-}
+  PGBACKREST_REPO1_S3_BUCKET: ${YEDEK_R2_KOVA:-}
+  PGBACKREST_REPO1_S3_REGION: auto
+  PGBACKREST_REPO1_S3_URI_STYLE: path
+  PGBACKREST_REPO1_S3_KEY: ${YEDEK_R2_ANAHTAR:-}
+  PGBACKREST_REPO1_S3_KEY_SECRET: ${YEDEK_R2_GIZLI:-}
+  PGBACKREST_REPO1_CIPHER_TYPE: aes-256-cbc
+  PGBACKREST_REPO1_CIPHER_PASS: ${YEDEK_SIFRESI:-}
+  # Saklama: son 2 TAM yedek (≈ 2 hafta) ve aradaki tüm WAL → bu süre içinde herhangi bir dakikaya dönülebilir.
+  PGBACKREST_REPO1_RETENTION_FULL: ${YEDEK_TAM_SAKLA:-2}
+  PGBACKREST_COMPRESS_TYPE: zst
+  PGBACKREST_PROCESS_MAX: 2
+  PGBACKREST_LOG_LEVEL_CONSOLE: info
+  PGBACKREST_LOG_LEVEL_FILE: 'off'
+
+services:
+  db:
+    build: ./db
+    image: repiom/db:17.12
+    restart: unless-stopped
+    environment:
+      <<: *db-ortak
+      PGPORT: 5432
+      POSTGRES_PORT: 5432
+    volumes:
+      - db-veri:/var/lib/postgresql/data
+      - db-soket:/var/run/postgresql
+    command: ['postgres', '-c', 'config_file=/etc/postgresql/postgresql.conf', '-c', 'log_min_messages=fatal']
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres', '-h', 'localhost']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    shm_size: 256m
+
+  yedekci:
+    image: repiom/db:17.12
+    restart: unless-stopped
+    user: postgres
+    entrypoint: ['/usr/local/bin/repiom-yedekci.sh']
+    environment:
+      <<: *db-ortak
+      YEDEK_SAATI: ${YEDEK_SAATI:-03:30}
+    volumes:
+      - db-veri:/var/lib/postgresql/data:ro
+      - db-soket:/var/run/postgresql
+      - yedek-durum:/var/lib/pgbackrest
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      # Son yedek işi başarılı ve 26 saatten yeni olmalı.
+      test:
+        [
+          'CMD-SHELL',
+          'grep -q TAMAM /var/lib/pgbackrest/durum && [ $$(( $$(date +%s) - $$(stat -c %Y /var/lib/pgbackrest/durum) )) -lt 93600 ]',
+        ]
+      interval: 10m
+      timeout: 10s
+      retries: 1
+      start_period: 30m
+
+  auth:
+    image: public.ecr.aws/supabase/gotrue:v2.198.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: ${SITE_URL:?SITE_URL gerekli}/auth/v1
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@db:5432/postgres
+      GOTRUE_SITE_URL: ${SITE_URL}
+      GOTRUE_URI_ALLOW_LIST: ${SITE_URL}/**
+      GOTRUE_DISABLE_SIGNUP: 'false'
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: ${JWT_EXPIRY:-3600}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET:?JWT_SECRET gerekli}
+      GOTRUE_JWT_ISSUER: ${SITE_URL}/auth/v1
+      GOTRUE_PASSWORD_MIN_LENGTH: 8
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: 'true'
+      GOTRUE_EXTERNAL_PHONE_ENABLED: 'false'
+      GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: 'false'
+      # Üretimde e-posta doğrulaması AÇIK (yerel denemede .env ile kapatılabilir).
+      GOTRUE_MAILER_AUTOCONFIRM: ${EPOSTA_DOGRULAMASIZ:-false}
+      GOTRUE_SMTP_HOST: ${SMTP_HOST:-}
+      GOTRUE_SMTP_PORT: ${SMTP_PORT:-587}
+      GOTRUE_SMTP_USER: ${SMTP_USER:-}
+      GOTRUE_SMTP_PASS: ${SMTP_PASS:-}
+      GOTRUE_SMTP_ADMIN_EMAIL: ${SMTP_GONDEREN:-}
+      GOTRUE_SMTP_SENDER_NAME: REPİO(M)
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_RECOVERY: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_INVITE: /auth/v1/verify
+      # Türkçe şablonlar (supabase/templates) iç ağ geçidinden okunur.
+      GOTRUE_MAILER_TEMPLATES_CONFIRMATION: http://yonlendirici:8000/eposta/dogrulama.html
+      GOTRUE_MAILER_TEMPLATES_RECOVERY: http://yonlendirici:8000/eposta/sifre-sifirlama.html
+      GOTRUE_MAILER_TEMPLATES_EMAIL_CHANGE: http://yonlendirici:8000/eposta/eposta-degisikligi.html
+      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: REPİO(M) — e-posta adresini doğrula
+      GOTRUE_MAILER_SUBJECTS_RECOVERY: REPİO(M) — şifre sıfırlama
+      GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGE: REPİO(M) — e-posta değişikliğini onayla
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:9999/health']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  goc:
+    image: repiom/db:17.12
+    restart: 'no'
+    entrypoint: ['sh', '/goc/goc.sh']
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+      ILK_VERI: ${ILK_VERI:-1}
+    volumes:
+      - ../supabase/migrations:/goc/migrations:ro
+      - ./goc/goc.sh:/goc/goc.sh:ro
+      - ./goc/ilk-veri.sql:/goc/ilk-veri.sql:ro
+    depends_on:
+      auth:
+        condition: service_healthy
+
+  rest:
+    image: public.ecr.aws/supabase/postgrest:v16.5
+    restart: unless-stopped
+    depends_on:
+      goc:
+        condition: service_completed_successfully
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@db:5432/postgres
+      PGRST_DB_SCHEMAS: public,graphql_public
+      PGRST_DB_EXTRA_SEARCH_PATH: public,extensions
+      PGRST_DB_MAX_ROWS: 1000
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_DB_USE_LEGACY_GUCS: 'false'
+      PGRST_APP_SETTINGS_JWT_EXP: ${JWT_EXPIRY:-3600}
+      PGRST_ADMIN_SERVER_PORT: 3001
+      PGRST_ADMIN_SERVER_HOST: localhost
+    command: ['postgrest']
+    healthcheck:
+      test: ['CMD', 'postgrest', '--ready']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  functions:
+    image: public.ecr.aws/supabase/edge-runtime:v1.79.1
+    restart: unless-stopped
+    depends_on:
+      goc:
+        condition: service_completed_successfully
+    mem_limit: ${FONKSIYON_BELLEK:-1g}
+    command:
+      ['start', '--user-worker-request-idle-timeout', '150000', '--main-service', '/home/deno/yonlendirici']
+    volumes:
+      - ../supabase/functions:/home/deno/functions:ro
+      - ./fonksiyonlar/main:/home/deno/yonlendirici:ro
+      - deno-onbellek:/root/.cache/deno
+    environment:
+      VERIFY_JWT: 'false'
+      JWT_SECRET: ${JWT_SECRET}
+      SUPABASE_URL: http://yonlendirici:8000
+      SUPABASE_ANON_KEY: ${ANON_KEY:?ANON_KEY gerekli}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY:?SERVICE_ROLE_KEY gerekli}
+      ORTAM: ${ORTAM:-uretim}
+      IZINLI_KAYNAKLAR: ${SITE_URL}
+      ODEME_DONUS_URL: ${SITE_URL}/functions/v1/odeme-sonuc
+      IYZICO_URL: ${IYZICO_URL:-}
+      IYZICO_API_KEY: ${IYZICO_API_KEY:-}
+      IYZICO_SECRET_KEY: ${IYZICO_SECRET_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      YZ_MODEL: ${YZ_MODEL:-claude-sonnet-5-5}
+      APPLE_ISSUER_ID: ${APPLE_ISSUER_ID:-}
+      APPLE_KEY_ID: ${APPLE_KEY_ID:-}
+      APPLE_PRIVATE_KEY: ${APPLE_PRIVATE_KEY:-}
+      APPLE_BUNDLE_ID: ${APPLE_BUNDLE_ID:-com.repiom.uygulama}
+      GOOGLE_PACKAGE_NAME: ${GOOGLE_PACKAGE_NAME:-com.repiom.uygulama}
+      GOOGLE_SERVICE_ACCOUNT: ${GOOGLE_SERVICE_ACCOUNT:-}
+      MAGAZA_BILDIRIM_ANAHTARI: ${MAGAZA_BILDIRIM_ANAHTARI:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+    healthcheck:
+      test: ['CMD-SHELL', "timeout 1 bash -c '</dev/tcp/127.0.0.1/9000'"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  yonlendirici:
+    build:
+      context: ..
+      dockerfile: sunucu/yonlendirici/Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${SITE_URL}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${ANON_KEY}
+        VITE_SENTRY_DSN: ${WEB_SENTRY_DSN:-}
+        YEREL: ${YEREL_DENEME:-0}
+    image: repiom/yonlendirici:latest
+    restart: unless-stopped
+    depends_on:
+      auth:
+        condition: service_healthy
+      rest:
+        condition: service_healthy
+      functions:
+        condition: service_healthy
+    environment:
+      # Üretim: alan adı (ör. repiom.com.tr) → 80/443, otomatik sertifika. Yerel deneme: http://localhost:8080
+      SITE_ADRESI: ${SITE_ADRESI:?SITE_ADRESI gerekli}
+      ACME_EPOSTA: ${ACME_EPOSTA:?ACME_EPOSTA gerekli (Let's Encrypt sertifika bildirimleri)}
+    ports:
+      - '${HTTP_PORTU:-80}:80'
+      - '${HTTPS_PORTU:-443}:443'
+      - '${HTTPS_PORTU:-443}:443/udp'
+    volumes:
+      - caddy-veri:/data
+      - caddy-ayar:/config
+
+  meta:
+    profiles: [yonetim]
+    image: public.ecr.aws/supabase/postgres-meta:v0.100.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: postgres
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      CRYPTO_KEY: ${PG_META_CRYPTO_KEY:-}
+
+  studio:
+    profiles: [yonetim]
+    image: public.ecr.aws/supabase/studio:2026.11.16-sha-51bd16d
+    restart: unless-stopped
+    depends_on: [meta]
+    ports:
+      - '127.0.0.1:3000:3000'
+    environment:
+      HOSTNAME: 0.0.0.0
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PG_META_CRYPTO_KEY: ${PG_META_CRYPTO_KEY:-}
+      PGRST_DB_SCHEMAS: public,graphql_public
+      DEFAULT_ORGANIZATION_NAME: REPİO(M)
+      DEFAULT_PROJECT_NAME: Üretim
+      SUPABASE_URL: http://yonlendirici:8000
+      SUPABASE_PUBLIC_URL: ${SITE_URL}
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      AUTH_JWT_SECRET: ${JWT_SECRET}
+
+volumes:
+  db-veri:
+  db-soket:
+  yedek-durum:
+  deno-onbellek:
+  caddy-veri:
+  caddy-ayar:

@@ -69,7 +69,7 @@ if (!yalnizKod) {
   /* 4. Sunucu ortam dosyası (sunucu/.env — yalnız sunucuda; şablon: sunucu/.env.example) */
   const i = process.argv.indexOf('--ortam');
   const ZORUNLU = {
-    adres: ['SITE_ADRESI', 'SITE_URL', 'ACME_EPOSTA'],
+    adres: ['SITE_URL'],
     gizli: [
       'POSTGRES_PASSWORD',
       'JWT_SECRET',

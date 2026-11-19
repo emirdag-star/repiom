@@ -1,7 +1,12 @@
-# REPİO(M) tek giriş noktası: web uygulaması + API yönlendirmesi + otomatik HTTPS (Let's Encrypt).
+# REPİO(M) iç yönlendirici: web uygulaması + API yönlendirmesi. HTTPS ve alan adı sunucudaki nginx'te (dış ters vekil);
+# bu konteyner yalnız düz HTTP (80) dinler ve nginx-proxy-network ağından erişilir.
 {
-	email {$ACME_EPOSTA}
 	admin off
+	auto_https off
+	servers {
+		# İstemci IP'si nginx'in X-Forwarded-For başlığından alınır (giriş denemesi sınırları doğru kişiye uygulanır).
+		trusted_proxies static private_ranges
+	}
 }
 
 (api) {
@@ -35,8 +40,8 @@
 	}
 }
 
-# Dış adres: üretimde alan adı (ör. repiom.com.tr → HTTPS otomatik), yerel denemede http://localhost:8080.
-{$SITE_ADRESI} {
+# Dış adres: nginx bu adrese iletir (http://yonlendirici:80).
+:80 {
 	encode zstd gzip
 	import api
 	# Çalışma zamanı ayarı (gizli değil): imaj her ortamda aynı, değerler ortam değişkenlerinden.

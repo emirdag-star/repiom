@@ -41,8 +41,6 @@ const sahte = {
   ANON_KEY: 'x',
   SERVICE_ROLE_KEY: 'x',
   SITE_URL: 'x',
-  SITE_ADRESI: 'x',
-  ACME_EPOSTA: 'x',
 };
 calistir('docker compose build db functions yonlendirici', sahte);
 for (const i of IMAJLAR) calistir(`docker tag ${KAYIT}/${i}:${surum} ${KAYIT}/${i}:latest`);

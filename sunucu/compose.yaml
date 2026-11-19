@@ -1,6 +1,6 @@
 # REPİO(M) — kendi sunucumuzda (Türkiye) tam kurulum.
 # Servisler: db (Postgres + sürekli yedek), yedekci (gece yedekleri), auth (GoTrue), rest (PostgREST),
-# functions (sunucu fonksiyonları), goc (migration, tek seferlik), yonlendirici (Caddy: web + API + otomatik HTTPS).
+# functions (sunucu fonksiyonları), goc (migration, tek seferlik), yonlendirici (Caddy: web + API yönlendirmesi; HTTPS sunucudaki nginx'te).
 # Yönetim paneli (Studio) yalnız istendiğinde: `docker compose --profile yonetim up -d` → yalnız 127.0.0.1:3000
 # (sunucuya SSH tüneliyle erişilir; internete açılmaz).
 # Supabase'in resmi kendi-sunucu kurulumundan (docker/, Apache-2.0) sadeleştirildi: realtime, depolama, günlük toplama
@@ -234,10 +234,15 @@ services:
         condition: service_healthy
       functions:
         condition: service_healthy
+    # Dışarıya açılan TEK servis: sunucudaki nginx (HTTPS, alan adı) bu konteynere nginx-proxy-network ağından,
+    # http://<konteyner adı>:80 adresiyle iletir. Sunucuda port yayımlanmaz.
+    container_name: repiom-yonlendirici
+    networks:
+      - default
+      - nginx-proxy-network
+    expose:
+      - '80'
     environment:
-      # Üretim: alan adı (ör. repiom.com.tr) → 80/443, otomatik sertifika. Yerel deneme: http://localhost:8080
-      SITE_ADRESI: ${SITE_ADRESI:?SITE_ADRESI gerekli}
-      ACME_EPOSTA: ${ACME_EPOSTA:?ACME_EPOSTA gerekli (Let's Encrypt sertifika bildirimleri)}
       # Web uygulamasının çalışma zamanı ayarı (/ayar.js; gizli değil) — imaj her ortamda aynı kalır.
       SITE_URL: ${SITE_URL}
       ANON_KEY: ${ANON_KEY}
@@ -246,13 +251,6 @@ services:
       SURUM: ${SURUM:-latest}
       # Yalnız yerel deneme: "-yerel" → HTTPS'e zorlama ve HSTS başlıkları olmadan
       BASLIK_EKI: ${BASLIK_EKI:-}
-    ports:
-      - '${HTTP_PORTU:-80}:80'
-      - '${HTTPS_PORTU:-443}:443'
-      - '${HTTPS_PORTU:-443}:443/udp'
-    volumes:
-      - caddy-veri:/data
-      - caddy-ayar:/config
 
   meta:
     profiles: [yonetim]
@@ -299,5 +297,8 @@ volumes:
   db-soket:
   yedek-durum:
   deno-onbellek:
-  caddy-veri:
-  caddy-ayar:
+
+networks:
+  # Sunucudaki nginx'in ağı (önceden var olmalı: docker network create nginx-proxy-network). Yalnız yönlendirici katılır.
+  nginx-proxy-network:
+    external: true

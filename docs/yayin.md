@@ -16,20 +16,20 @@ Kurulum dosyaları `sunucu/` klasöründe; ayrıntılar aşağıda.
    AB)**, **Anthropic (yalnız rızayla yapay zekâ, ABD)**, **e-posta servisi**. Veritabanı Türkiye'de. Aydınlatma
    metni bu alıcılara göre güncellenmeli (sürüm değişince kullanıcılardan yeniden onay istenir).
 2. **Mali müşavir:** e-fatura / e-arşiv.
-3. **Alan adı** (DNS A kaydı sunucunun IP'sine) ve kurumsal e-posta adresleri.
+3. **Alan adı** (DNS A kaydı sunucunun IP'sine; sertifika nginx'te) ve kurumsal e-posta adresleri.
 
 ## 1. Sunucudaki yığın (`sunucu/compose.yaml`)
 
-| Servis                 | Görev                                                                                                                           | Dışarı açık mı                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `yonlendirici` (Caddy) | Web uygulaması + `/auth/v1`, `/rest/v1`, `/functions/v1` yönlendirmesi, **otomatik HTTPS** (Let's Encrypt), güvenlik başlıkları | **Evet: 80, 443**                       |
-| `db`                   | Postgres (Supabase imajı) + pgBackRest (her WAL kaydı şifreli olarak R2'ye)                                                     | Hayır                                   |
-| `yedekci`              | Gece yedekleri (pazar tam, diğer günler fark), saklama, durum                                                                   | Hayır                                   |
-| `auth`                 | Kayıt / giriş / e-posta (GoTrue), Türkçe şablonlar                                                                              | Yönlendirici üzerinden                  |
-| `rest`                 | Veritabanı API'si (PostgREST; erişim kuralları RLS ile)                                                                         | Yönlendirici üzerinden                  |
-| `functions`            | Sunucu fonksiyonları (ödeme, yapay zekâ, mağaza, hesap silme)                                                                   | Yönlendirici üzerinden; `test-*` kapalı |
-| `goc`                  | Her başlatmada eksik migration'ları uygular (tek seferlik)                                                                      | Hayır                                   |
-| `studio` + `meta`      | Yönetim paneli — yalnız gerektiğinde (`--profile yonetim`), yalnız `127.0.0.1:3000` (SSH tüneliyle)                             | Hayır                                   |
+| Servis                 | Görev                                                                                                                                  | Dışarı açık mı                                                                        |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `yonlendirici` (Caddy) | Web uygulaması + `/auth/v1`, `/rest/v1`, `/functions/v1` yönlendirmesi, güvenlik başlıkları. HTTPS ve alan adı **sunucudaki nginx'te** | **Yalnız `nginx-proxy-network` ağından** (`repiom-yonlendirici:80`); port yayımlanmaz |
+| `db`                   | Postgres (Supabase imajı) + pgBackRest (her WAL kaydı şifreli olarak R2'ye)                                                            | Hayır                                                                                 |
+| `yedekci`              | Gece yedekleri (pazar tam, diğer günler fark), saklama, durum                                                                          | Hayır                                                                                 |
+| `auth`                 | Kayıt / giriş / e-posta (GoTrue), Türkçe şablonlar                                                                                     | Yönlendirici üzerinden                                                                |
+| `rest`                 | Veritabanı API'si (PostgREST; erişim kuralları RLS ile)                                                                                | Yönlendirici üzerinden                                                                |
+| `functions`            | Sunucu fonksiyonları (ödeme, yapay zekâ, mağaza, hesap silme)                                                                          | Yönlendirici üzerinden; `test-*` kapalı                                               |
+| `goc`                  | Her başlatmada eksik migration'ları uygular (tek seferlik)                                                                             | Hayır                                                                                 |
+| `studio` + `meta`      | Yönetim paneli — yalnız gerektiğinde (`--profile yonetim`), yalnız `127.0.0.1:3000` (SSH tüneliyle)                                    | Hayır                                                                                 |
 
 Sürümler, testlerin çalıştığı yerel Supabase sürümleriyle aynıdır. Realtime, dosya depolama, günlük toplama ve
 bağlantı havuzu kullanılmadığı için kurulmaz.
@@ -39,6 +39,26 @@ bağlantı havuzu kullanılmadığı için kurulmaz.
 Önerilen en az: 4 çekirdek, 8 GB bellek, 80 GB SSD, Ubuntu 24.04. Sunucuda **kaynak kod bulunmaz**: yalnız
 `compose.yaml`, `geri-yukle.sh` ve `.env` (imajlar `registry.sargin.me/repiom/*`).
 
+- **Dış erişim:** sunucudaki nginx alan adını (HTTPS) `http://repiom-yonlendirici:80` adresine iletir; yönlendirici
+  `nginx-proxy-network` ağına katılır, başka hiçbir servis bu ağda değildir ve hiçbir port yayımlanmaz. Örnek:
+
+```nginx
+server {
+    server_name repiom.com.tr;
+    listen 443 ssl;  # sertifika ayarları sunucudaki düzene göre
+    client_max_body_size 25m;
+    location / {
+        proxy_pass http://repiom-yonlendirici:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 170s;  # yapay zekâ adımı en çok ~150 sn sürebilir
+    }
+}
+```
+
+- **E-posta:** sunucudaki mevcut posta sunucusu kullanılır (ayrı konteyner yok). `.env`'de `SMTP_HOST` / `SMTP_PORT` /
+  `SMTP_USER` / `SMTP_PASS` / `SMTP_GONDEREN`; `auth` konteyneri bu adrese erişebilmeli.
 - **Güvenlik:** yalnız SSH anahtarıyla giriş (parola kapalı); güvenlik duvarında yalnız 22, 80, 443 açık; otomatik
   güvenlik güncellemeleri (`unattended-upgrades`); Docker günlüklerine boyut sınırı (`/etc/docker/daemon.json`:
   `"log-opts": {"max-size": "50m", "max-file": "5"}`).
@@ -124,7 +144,7 @@ yöneticisinde) tutulmalı.
 ### Aylık geri yükleme denemesi (zorunlu alışkanlık)
 
 Yedeğin gerçekten açıldığı ancak denenerek bilinir. Ayda bir, **bu bilgisayarda** (sunucuya dokunmadan):
-`sunucu/.env`'in kopyasıyla (R2 bilgileri ve `YEDEK_SIFRESI` aynı, `SITE_ADRESI=http://localhost:8080`) yerel deneme
+`sunucu/.env`'in kopyasıyla (R2 bilgileri ve `YEDEK_SIFRESI` aynı, `SITE_URL=http://localhost:8080`) yerel deneme
 yığınını boş birimlerle başlat → `./geri-yukle.sh son --yerel --env-file <kopya>` → kullanıcı / proje / ödeme
 sayılarını üretimle karşılaştır → sonucu not et → `docker compose down -v` ile sil. 19.11.2026'da yerelde denendi:
 silinen kayıt hedef dakikaya dönülerek geri geldi, hedef andan sonraki kayıt geri alındı.
@@ -151,6 +171,7 @@ cd sunucu; docker compose -f compose.yaml -f compose.yerel.yaml --env-file .env.
 # ya da derlenmiş imajlarla: $env:SURUM='<etiket>'; docker compose ... up -d --no-build
 ```
 
-`.env.yerel`: `node anahtar-uret.mjs` çıktısında `SITE_ADRESI=http://localhost:8080`, `SITE_URL=http://localhost:8080`,
-`SMTP_HOST=posta`, `SMTP_PORT=1025`, `BASLIK_EKI=-yerel`, `YEDEK_DEPO_TURU=posix`, `YEDEK_DEPO_YOLU=/yedek-deposu`.
-Web: http://localhost:8080 · e-postalar: http://localhost:8025. Bu dosya depoya girmez.
+Önce bir kez `docker network create nginx-proxy-network`. `.env.yerel`: `node anahtar-uret.mjs` çıktısında
+`SITE_URL=http://localhost:8080`, `EPOSTA_DOGRULAMASIZ=true` (yerelde e-posta gönderilmez),
+`BASLIK_EKI=-yerel`, `YEDEK_DEPO_TURU=posix`, `YEDEK_DEPO_YOLU=/yedek-deposu`.
+Web: http://localhost:8080. Bu dosya depoya girmez.

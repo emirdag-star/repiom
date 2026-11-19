@@ -1,26 +1,18 @@
 # YALNIZ YEREL DENEME (bu bilgisayarda): üretim compose'unun üzerine eklenir.
+#   docker network create nginx-proxy-network   (bir kez; sunucudaki nginx ağının yerel karşılığı)
 #   docker compose -f compose.yaml -f compose.yerel.yaml --env-file .env.yerel up -d --build
-# Farklar: site http://localhost:8080 (HTTPS yok), e-postalar Mailpit'e (http://localhost:8025) düşer,
-# yedek deposu R2 yerine yerel bir Docker birimi (posix). Gerçek kişi verisi KULLANILMAZ.
+# Farklar: nginx yok — yönlendirici doğrudan http://localhost:8080'de; e-posta gönderilmez (.env.yerel'de
+# EPOSTA_DOGRULAMASIZ=true); yedek deposu R2 yerine yerel bir Docker birimi (posix). Gerçek kişi verisi KULLANILMAZ.
 services:
   yonlendirici:
-    ports: !override
-      - '127.0.0.1:8080:8080'
+    ports:
+      - '127.0.0.1:8080:80'
   db:
     volumes:
       - yedek-deposu:/yedek-deposu
   yedekci:
     volumes:
       - yedek-deposu:/yedek-deposu
-  auth:
-    depends_on:
-      posta:
-        condition: service_started
-  posta:
-    image: axllent/mailpit:v1.27
-    restart: unless-stopped
-    ports:
-      - '127.0.0.1:8025:8025'
 
 volumes:
   yedek-deposu:

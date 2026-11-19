@@ -27,3 +27,8 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Yerel yedek denemeleri (şifreli de olsa depoya girmez)
+yedekler/
+yedek-acik/
+*.rpyd

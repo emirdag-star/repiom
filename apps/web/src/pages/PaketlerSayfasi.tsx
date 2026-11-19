@@ -4,7 +4,8 @@
  */
 import { SIRKET } from '@repiom/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { olaySay } from '@repiom/istemci/olcum';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { BelgeBaglantisi } from '../components/Belge';
 import { HataKutusu } from '../components/HataKutusu';
@@ -50,6 +51,7 @@ export function PaketlerSayfasi() {
   const istemci = useQueryClient();
   const onayla = useOnay();
   const hak = useHak();
+  useEffect(() => olaySay('paketler_goruntuleme'), []);
   const liste = useQuery({ queryKey: ['paketler'], queryFn: paketler });
   const gecmis = useQuery({ queryKey: ['odemelerim'], queryFn: odemelerim });
   const [secili, setSecili] = useState<Paket | null>(null);

@@ -33,6 +33,9 @@ Yerelde e-posta doğrulaması kapalıdır; kayıt olunca doğrudan giriş yapıl
 | `pnpm e2e`                                       | Uçtan uca testler, masaüstü ve telefon (Playwright)                            |
 | `pnpm dxf:karsilastir <mimari.dxf> [statik.dxf]` | Gerçek çizimi prototip ve yeni kodla analiz edip farkları yazar (yalnız yerel) |
 | `pnpm e2e:mobil`                                 | Mobil uygulamanın uçtan uca testleri (web derlemesinde, telefon görünümü)      |
+| `pnpm yedek` / `pnpm yedek:geri-yukle <dosya>`   | Şifreli yedek al / yerel veritabanına geri yükle (`YEDEK_SIFRESI` gerekir)     |
+| `pnpm yayin:denetim --ortam <dosya>`             | Yayın öncesi eksikleri listeler                                                |
+| `pnpm yayinla --ortam <dosya> [--uygula]`        | Üretime yayın (varsayılan kuru çalışır) — `docs/yayin.md`                      |
 | `pnpm gen:check`                                 | Formül dosyası `veri.js` ile güncel mi                                         |
 | `pnpm build`                                     | Üretim derlemesi                                                               |
 

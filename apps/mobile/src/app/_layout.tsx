@@ -1,11 +1,13 @@
 /** Kök düzen: sorgu önbelleği, oturum ve korumalı yollar (oturum yoksa giriş/kayıt). */
 import '../lib/supabase';
+import { olaySay } from '@repiom/istemci/olcum';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { Yukleniyor } from '../bilesenler/temel';
 import { R } from '../bilesenler/tema';
+import { HATA_KAYDI_ACIK, hataKaydiniBaslat, Sentry } from '../lib/hataKaydi';
 import { OturumSaglayici, useOturum } from '../lib/oturum';
 
 function Yollar() {
@@ -24,7 +26,10 @@ function Yollar() {
   );
 }
 
-export default function KokDuzen() {
+hataKaydiniBaslat();
+olaySay('uygulama_acilis');
+
+function KokDuzen() {
   const [istemci] = useState(
     () => new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } } }),
   );
@@ -37,3 +42,6 @@ export default function KokDuzen() {
     </QueryClientProvider>
   );
 }
+
+// Hata kaydı açıksa kök bileşen Sentry ile sarılır (yakalanmamış hatalar).
+export default HATA_KAYDI_ACIK ? Sentry.wrap(KokDuzen) : KokDuzen;

@@ -50,6 +50,8 @@ writeFileSync(
 EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${anahtar}
 # Yerelde sahte mağaza (gerçek App Store / Google Play yok)
 EXPO_PUBLIC_SAHTE_MAGAZA=1
+# Şifre sıfırlama bağlantısı web uygulamasına gider
+EXPO_PUBLIC_WEB_URL=http://localhost:5173
 `,
   'utf8',
 );

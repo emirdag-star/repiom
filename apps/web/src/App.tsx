@@ -10,6 +10,7 @@ import { HesapSayfasi } from './pages/HesapSayfasi';
 import { PaketlerSayfasi } from './pages/PaketlerSayfasi';
 import { GirisSayfasi } from './pages/GirisSayfasi';
 import { KayitSayfasi } from './pages/KayitSayfasi';
+import { SifremiUnuttumSayfasi, YeniSifreSayfasi } from './pages/SifreSayfalari';
 import { ProjeAkisiSayfasi } from './pages/ProjeAkisiSayfasi';
 import { ProjelerimSayfasi } from './pages/ProjelerimSayfasi';
 import { YoneticiSayfasi } from './pages/YoneticiSayfasi';
@@ -24,6 +25,9 @@ const yonlendirici = createBrowserRouter([
     children: [
       { path: '/giris', element: <GirisSayfasi /> },
       { path: '/kayit', element: <KayitSayfasi /> },
+      { path: '/sifremi-unuttum', element: <SifremiUnuttumSayfasi /> },
+      // Oturum (bağlantıdan) olsa da olmasa da açılır; oturum açık kullanıcıyı ana sayfaya yönlendirmez.
+      { path: '/sifre-yenile', element: <YeniSifreSayfasi /> },
       {
         element: <OturumGerekli />,
         children: [

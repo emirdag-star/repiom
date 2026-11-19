@@ -22,6 +22,7 @@ baglan(supabase, {
   url: url ?? '',
   anahtar: key ?? '',
   platform: {
+    ad: 'web',
     cihaz: () => navigator.userAgent,
     sha256: async (metin) => {
       const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(metin));

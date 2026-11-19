@@ -3,7 +3,8 @@ import { ADIMLAR } from '@repiom/istemci/adimlar';
 import { tarihGun } from '@repiom/istemci/fiyat';
 import { useProjeEditoru } from '@repiom/istemci/useProjeEditoru';
 import { Stack, useRouter } from 'expo-router';
-import { useRef, useState, type ReactNode } from 'react';
+import { olaySay, type Olay } from '@repiom/istemci/olcum';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ScrollView, Text, View, type ScrollViewInstance } from 'react-native';
 import { Dugme, HataKutusu, Sekmeler, Uyari, Yukleniyor } from '../bilesenler/temel';
 import { R, S } from '../bilesenler/tema';
@@ -36,6 +37,7 @@ export function ProjeAkisiEkrani({ id }: { id: string }) {
   const [adim, setAdim] = useState<Yol>('proje');
   const [blokSecili, setBlok] = useState(0);
   const kaydirma = useRef<ScrollViewInstance>(null);
+  useEffect(() => olaySay(`adim:${adim}` as Olay), [adim]);
 
   if (editor.hata)
     return (

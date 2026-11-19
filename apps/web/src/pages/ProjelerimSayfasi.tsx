@@ -1,7 +1,7 @@
 import { calculate, emptyProject, exampleProject, type ProjectInput } from '@repiom/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { HataKutusu } from '../components/HataKutusu';
 import { useOnay } from '../components/OnayPenceresi';
 import { Yukleniyor } from '../components/Yukleniyor';
@@ -23,7 +23,10 @@ export function ProjelerimSayfasi() {
   const navigate = useNavigate();
   const onayla = useOnay();
   const istemci = useQueryClient();
-  const [mesaj, setMesaj] = useState<string | null>(null);
+  const konum = useLocation();
+  const [mesaj, setMesaj] = useState<string | null>(
+    (konum.state as { mesaj?: string } | null)?.mesaj ?? null,
+  );
   const projeler = useQuery({ queryKey: ['projeler'], queryFn: projeleriListele });
 
   const olustur = useMutation({

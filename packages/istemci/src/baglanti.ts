@@ -5,6 +5,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface Platform {
+  /** Kullanım sayaçları için platform adı. */
+  ad: 'web' | 'ios' | 'android';
   /** Onay kayıtlarında saklanan cihaz/tarayıcı bilgisi (en çok 200 karakter). */
   cihaz(): string;
   /** SHA-256 (onaltılık, küçük harf). */

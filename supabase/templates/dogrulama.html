@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="tr">
+  <body
+    style="
+      margin: 0;
+      padding: 24px;
+      background: #f3f4f6;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #1f2937;
+    "
+  >
+    <table
+      role="presentation"
+      width="100%"
+      style="
+        max-width: 520px;
+        margin: 0 auto;
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+      "
+    >
+      <tr>
+        <td style="padding: 24px">
+          <p style="font-size: 20px; font-weight: bold; margin: 0 0 16px">
+            REPİO<span style="color: #c2410c">(M)</span>
+          </p>
+          <h1 style="font-size: 18px; margin: 0 0 12px">E-posta adresini doğrula</h1>
+          <p style="font-size: 15px; line-height: 22px; margin: 0 0 20px">
+            REPİO(M) hesabını tamamlamak için e-posta adresini doğrula.
+          </p>
+          <p style="margin: 0 0 20px">
+            <a
+              href="{{ .ConfirmationURL }}"
+              style="
+                display: inline-block;
+                background: #c2410c;
+                color: #ffffff;
+                text-decoration: none;
+                font-weight: bold;
+                padding: 12px 20px;
+                border-radius: 8px;
+              "
+              >E-postamı doğrula</a
+            >
+          </p>
+          <p style="font-size: 13px; line-height: 19px; color: #4b5563; margin: 0">
+            Bu kaydı sen yapmadıysan bu e-postayı yok sayabilirsin; hesap açılmaz.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -1,0 +1,40 @@
+# ÜRETİM ORTAM DEĞİŞKENLERİ — ŞABLON. Bu dosyanın doldurulmuş kopyası DEPOYA GİRMEZ (parola yöneticisinde ya da
+# yalnız senin erişebildiğin bir klasörde tut). Kullanım: node scripts/yayin-denetimi.mjs --ortam <dosya>
+#                                                          node scripts/yayinla.mjs --ortam <dosya> [--uygula]
+# Mobil değişkenler EAS'e `eas env:create` ile girilir (docs/yayin.md).
+
+# --- Web (Cloudflare Pages derlemesi) ---
+VITE_SUPABASE_URL=https://<proje-ref>.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_SENTRY_DSN=
+
+# --- Mobil (EAS) ---
+EXPO_PUBLIC_SUPABASE_URL=https://<proje-ref>.supabase.co
+EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+EXPO_PUBLIC_SENTRY_DSN=
+EXPO_PUBLIC_WEB_URL=https://<alan-adi>
+
+# --- Sunucu fonksiyonları (supabase secrets) ---
+ORTAM=uretim
+IZINLI_KAYNAKLAR=https://<alan-adi>
+IYZICO_URL=https://api.iyzipay.com
+IYZICO_API_KEY=
+IYZICO_SECRET_KEY=
+ODEME_DONUS_URL=https://<proje-ref>.supabase.co/functions/v1/odeme-sonuc
+ANTHROPIC_API_KEY=
+YZ_MODEL=claude-sonnet-5-5
+APPLE_ISSUER_ID=
+APPLE_KEY_ID=
+APPLE_PRIVATE_KEY=
+APPLE_BUNDLE_ID=com.repiom.uygulama
+GOOGLE_PACKAGE_NAME=com.repiom.uygulama
+GOOGLE_SERVICE_ACCOUNT=
+MAGAZA_BILDIRIM_ANAHTARI=
+SENTRY_DSN=
+
+# --- Yedekleme (yalnız yedek alan bilgisayarda) ---
+YEDEK_SIFRESI=
+YEDEK_R2_HESAP=
+YEDEK_R2_ANAHTAR=
+YEDEK_R2_GIZLI=
+YEDEK_R2_KOVA=repiom-yedek

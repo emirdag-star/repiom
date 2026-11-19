@@ -3,8 +3,17 @@ packages:
   - apps/*
 minimumReleaseAgeExclude:
   - expo-iap@6.5.1
+  - '@sentry/browser-utils@11.15.0'
+  - '@sentry/browser@11.15.0'
+  - '@sentry/core@11.15.0'
+  - '@sentry/feedback@11.15.0'
+  - '@sentry/react@11.15.0'
+  - '@sentry/replay-canvas@11.15.0'
+  - '@sentry/replay@11.15.0'
 
 # Kurulum betikleri: esbuild'in betiği gerekmiyor (tsx ikili paketini kendi bulur).
 allowBuilds:
   esbuild: false
   '@parcel/watcher': false
+  # Sentry komut satırı aracı yalnız kaynak haritası yüklemede gerekir (yayın hattında ayrıca kurulur).
+  '@sentry/cli': false
